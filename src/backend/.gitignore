@@ -1,0 +1,19 @@
+
+# IDE Files
+.settings/
+.project
+.classpath
+bin/
+target/
+
+# OS Files
+Thumbs.db
+.DS_Store
+
+# App Specific
+*.log
+sisie_database.db
+.idea/
+out/
+
+status.md
