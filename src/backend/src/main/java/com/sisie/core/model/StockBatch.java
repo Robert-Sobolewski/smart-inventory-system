@@ -32,14 +32,14 @@ public class StockBatch {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private long id;
 	
 	/**
 	 * Verknuepfung zum Produkt. Viele Batches koennen dasselbe Produkt enthalten.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="product_id", nullable = false)
-	private long product_id;
+	private Product product;
 	
 	/**
 	 * Verknuepfung zum Lagerplatz. Viele Batches koennen an einem Ort liegen.
