@@ -1,0 +1,44 @@
+### 1. Setup: Create a Location
+POST http://localhost:8888/api/locations/create
+Content-Type: application/json
+
+{
+    "loc":"A-01"
+}
+
+### 2. Setup: Create a Product
+POST http://localhost:8888/api/products/create
+Content-Type: application/json
+
+{
+    "sku": "TEST-001",
+    "name": "Test Chip",
+    "category": "Electronics",
+    "description": "High quality capacitor"
+}
+
+### 3. Logistics: Receive Goods (Add to Stock)
+POST http://localhost:8888/api/logistics/receive
+Content-Type: application/json
+
+{
+    "sku": "TEST-001",
+    "loc": "A-01",
+    "qty": 50
+}
+
+### 4 Logistics: Check available Product
+GET http://localhost:8888/api/logistics/stock/TEST-001
+
+
+### 5. Logistics: Issue Goods (FIFO Test)
+POST http://localhost:8888/api/logistics/issue
+Content-Type: application/json
+
+{
+    "sku": "TEST-001",
+    "qty": 20
+}
+
+### 6. Verify: Check Total Stock
+GET http://localhost:8888/api/products/test
