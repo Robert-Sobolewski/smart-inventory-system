@@ -32,7 +32,7 @@ public class StockBatch {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
 	/**
 	 * Verknuepfung zum Produkt. Viele Batches koennen dasselbe Produkt enthalten.
