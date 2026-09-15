@@ -11,9 +11,10 @@ Thumbs.db
 .DS_Store
 
 # App Specific
+*.class
 *.log
+*.db
 sisie_database.db
 .idea/
 out/
-
 status.md
