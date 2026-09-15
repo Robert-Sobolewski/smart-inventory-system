@@ -1,5 +1,8 @@
 package com.sisie.core.controller;
 
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,36 +22,35 @@ import lombok.RequiredArgsConstructor;
 public class LocationController {
 
 	private final LocationRepository locationRepository;
-	
+
 	@GetMapping("/test")
 	public String testDatabase() {
-		
-		// Ein location erstellen,  Beispiel: "A-01-12" (Regal A, Ebene 1, Fach 12)
-		Location location = Location.builder()
-				.locationCode("A-01-12")
-				.build();
-		
+
+		// Ein location erstellen, Beispiel: "A-01-12" (Regal A, Ebene 1, Fach 12)
+		Location location = Location.builder().locationCode("A-01-12").build();
+
 		// Speichern in die Datenbank
 		locationRepository.save(location);
-		
+
 		// Alle Lokationene auslesen , um zu pruefen ob es geklappt hat
 		long count = locationRepository.count();
 		return String.format("Datenbank-Test erfolgreich! Aktuelle Anzahl an Lokationen: %d", count);
 	}
-	
+
 	@PostMapping("/create")
-	public String createLocation(@RequestBody LocationCreateRequest request) {
-		
+	public ResponseEntity<String> createLocation(@RequestBody LocationCreateRequest request) {
+
 		// Prufen ob es sonst existiert
-		locationRepository.findByLocationCode(request.getLoc()).ifPresent(i ->{
-			throw new RuntimeException("Lagerplatz "+ request.getLoc() +" existiert bereits!");
-		});
-		
-		Location loc = Location.builder()
-				.locationCode(request.getLoc()).build();
-		
+		Optional<Location> exists = locationRepository.findByLocationCode(request.getLoc());
+
+		if (exists.isPresent()) {
+			throw new RuntimeException("Lagerplatz " + request.getLoc() + " existiert bereits!");
+		}
+
+		Location loc = Location.builder().locationCode(request.getLoc()).build();
+
 		locationRepository.save(loc);
-		
-		return "Lagerplatz " + request.getLoc() + " wurde erfolgreich angelegt.";
+
+		return ResponseEntity.ok("Lagerplatz " + request.getLoc() + " wurde erfolgreich angelegt.");
 	}
 }

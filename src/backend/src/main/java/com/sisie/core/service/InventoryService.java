@@ -43,6 +43,8 @@ public class InventoryService {
 		// 2. Erstellung eines neuen Batches (FIFO- heutiges Datum)
 		StockBatch sbatch = StockBatch.builder().product(product).location(location).quantity(quantity)
 				.receivedDate(LocalDate.now()).build();
+		
+		stockBatchRepository.save(sbatch);
 		return sbatch;
 	}
 
