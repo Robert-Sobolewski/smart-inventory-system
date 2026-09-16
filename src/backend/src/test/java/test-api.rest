@@ -1,44 +1,81 @@
-### 1. Setup: Create a Location
-POST http://localhost:8888/api/locations/create
+# SIS-IE API TEST SUITE
+# Instructions: 
+# 1. Start the Spring Boot application.
+# 2. Run requests in order.
+# 3. Copy the 'token' from the Login response and use it in the Authorization header for all other requests.
+
+### 1. AUTHENTICATION (The Gateway)
+# Goal: Get a JWT Token to access protected resources.
+# Expected Result: 200 OK with { "token": "eyJ..." }
+POST http://localhost:8888/api/auth/login
 Content-Type: application/json
 
 {
-    "loc":"A-01"
+    "username": "admin",
+    "password": "Admin123!"
 }
 
-### 2. Setup: Create a Product
+### 2. SETUP: Create Location (Protected)
+# Goal: Ensure we have a place to store items.
+# Header: Replace <TOKEN> with the token from Step 1.
+POST http://localhost:8888/api/locations/create?code=A-01
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{}
+
+### 3. SETUP: Create Product (Protected)
+# Goal: Add a product to the catalog.
+# Header: Replace <TOKEN> with the token from Step 1.
 POST http://localhost:8888/api/products/create
+Authorization: Bearer <TOKEN>
 Content-Type: application/json
 
 {
     "sku": "TEST-001",
-    "name": "Test Chip",
+    "name": "Industrial Capacitor 10uF",
     "category": "Electronics",
-    "description": "High quality capacitor"
+    "description": "High precision capacitor for industrial use"
 }
 
-### 3. Logistics: Receive Goods (Add to Stock)
+### 4. LOGISTICS: Receive Goods (Protected)
+# Goal: Add stock to the warehouse.
+# Header: Replace <TOKEN> with the token from Step 1.
 POST http://localhost:8888/api/logistics/receive
+Authorization: Bearer <TOKEN>
 Content-Type: application/json
 
 {
     "sku": "TEST-001",
     "loc": "A-01",
-    "qty": 50
+    "qty": 100
 }
 
-### 4 Logistics: Check available Product
+### 5. LOGISTICS: Check Total Stock (Protected)
+# Goal: Verify that the stock was correctly added.
+# Header: Replace <TOKEN> with the token from Step 1.
 GET http://localhost:8888/api/logistics/stock/TEST-001
+Authorization: Bearer <TOKEN>
 
-
-### 5. Logistics: Issue Goods (FIFO Test)
+### 6. LOGISTICS: Issue Goods - FIFO Test (Protected)
+# Goal: Remove some stock and test if it works.
+# Header: Replace <TOKEN> with the token from Step 1.
 POST http://localhost:8888/api/logistics/issue
+Authorization: Bearer <TOKEN>
 Content-Type: application/json
 
 {
     "sku": "TEST-001",
-    "qty": 20
+    "qty": 30
 }
 
-### 6. Verify: Check Total Stock
-GET http://localhost:8888/api/products/test
+### 7. VERIFY: Final Stock Check (Protected)
+# Goal: Should now show 70 pieces remaining.
+# Header: Replace <TOKEN> with the token from Step 1.
+GET http://localhost:8888/api/logistics/stock/TEST-001
+Authorization: Bearer <TOKEN>
+
+### 8. SECURITY TEST: Unauthorized Access (Negative Test)
+# Goal: Try to access stock WITHOUT a token.
+# Expected Result: 401 Unauthorized or 403 Forbidden.
+GET http://localhost:8888/api/logistics/stock/TEST-001
