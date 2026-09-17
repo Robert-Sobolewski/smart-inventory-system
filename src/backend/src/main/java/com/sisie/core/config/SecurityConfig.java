@@ -4,13 +4,16 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.sisie.core.security.JwtAuthenticationFilter;
 
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // Ermoeglicht @PreAuthorize auf den Controllern.
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -34,6 +38,7 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 
+		// industriestandard fuer Passwort-Hashing
 		return new BCryptPasswordEncoder();
 	}
 
@@ -79,15 +84,18 @@ public class SecurityConfig {
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
 				// Fuegen den Filter vor dem Standard-Username/Password Filter ein.
-				.addFilterBefore(jwtAuthenticationFilter,
-						org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
 				// Die Zugriffsregeln definieren
 				.authorizeHttpRequests(auth -> auth
 						// Erlaube allen den Zugriff auf die Login-Endpunkte
 						.requestMatchers("/api/auth/**").permitAll()
 						// Alle andere Endpunkte muessen geschuetzt werden
-						.anyRequest().authenticated());
+						.anyRequest().authenticated())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Keine
+				// Keine Sessions auf dem Server.
+				);
+
 		return http.build();
 	}
 

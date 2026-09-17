@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sisie.core.dto.AuthResponse;
 import com.sisie.core.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,10 @@ public class AuthController {
 			String username = credentials.get("username");
 			String password = credentials.get("password");
 			
-			String token = authService.login(username, password);
+			AuthResponse resp = authService.login(username, password);
 			
 			// Wir geben den Token in einem JSON-Obiekt zurueck.
-			return ResponseEntity.ok(Map.of("token",token));
+			return ResponseEntity.ok(Map.of("token",resp.getToken()));
 			
 		} catch (RuntimeException e) {
 			

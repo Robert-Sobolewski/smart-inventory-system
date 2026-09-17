@@ -3,6 +3,7 @@ package com.sisie.core.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.sisie.core.dto.AuthResponse;
 import com.sisie.core.model.User;
 import com.sisie.core.repository.UserRepository;
 import com.sisie.core.security.JwtTokenProvider;
@@ -24,7 +25,7 @@ public class AuthService {
 	 * @param rawPassword
 	 * @return - token
 	 */
-	public String login(String username, String rawPassword) {
+	public AuthResponse login(String username, String rawPassword) {
 
 		// 1. Nutzer in der DB suchen
 		User user = userRepository.findByUsername(username)
@@ -36,6 +37,8 @@ public class AuthService {
 		}
 
 		// 3. Wenn alles ok ist , Token generieren und zurueckgeben
-		return tokenProvider.generateToken(user.getUsername(), user.getRole().name());
+		String token = tokenProvider.generateToken(user.getUsername(), user.getRole().name());
+
+		return AuthResponse.builder().token(token).username(username).role(user.getRole().name()).build();
 	}
 }
