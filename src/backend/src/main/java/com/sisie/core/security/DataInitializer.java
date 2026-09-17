@@ -22,7 +22,7 @@ public class DataInitializer {
 
 				// Erstellung eines Admin-Nutzers mit verschluesseltem Passwort!
 				User admin = User.builder().username("admin").password(passwordEncoder.encode("Admin123!"))
-						.role(Role.ADMIN).build();
+						.role(Role.ROLE_ADMIN).build();
 				userRepository.save(admin);
 
 			} else {

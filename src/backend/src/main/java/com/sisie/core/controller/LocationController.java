@@ -3,6 +3,7 @@ package com.sisie.core.controller;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,12 +19,15 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/locations")
+@PreAuthorize("hasRole('ROLE_MANAGER')")
 @RequiredArgsConstructor
 public class LocationController {
 
 	private final LocationRepository locationRepository;
 
+	
 	@GetMapping("/test")
+	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
 	public String testDatabase() {
 
 		// Ein location erstellen, Beispiel: "A-01-12" (Regal A, Ebene 1, Fach 12)
