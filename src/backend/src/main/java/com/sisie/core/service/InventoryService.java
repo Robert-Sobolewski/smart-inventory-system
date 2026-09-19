@@ -43,7 +43,7 @@ public class InventoryService {
 		// 2. Erstellung eines neuen Batches (FIFO- heutiges Datum)
 		StockBatch sbatch = StockBatch.builder().product(product).location(location).quantity(quantity)
 				.receivedDate(LocalDate.now()).build();
-		
+
 		stockBatchRepository.save(sbatch);
 		return sbatch;
 	}
@@ -61,6 +61,10 @@ public class InventoryService {
 		// zuerst!)
 		List<StockBatch> batches = stockBatchRepository.findByProductOrderByReceivedDateAsc(product);
 
+		// When quantityToIssue is less or equal Zero throw exception
+		if (quantityToIssue <= 0) {
+			throw new RuntimeException("Quantity must Positiv sein!.");
+		}
 		int remainingToIssue = quantityToIssue;
 
 		for (StockBatch batch : batches) {
@@ -72,7 +76,8 @@ public class InventoryService {
 			if (currentBatchQty <= remainingToIssue) {
 				// Batch wird komplett geleert
 				remainingToIssue -= currentBatchQty;
-				stockBatchRepository.delete(batch);// oder erstellt quantity als zero: batch.setQuantity(0);
+				
+				batch.setQuantity(0);// erstellt quantity als zero: batch.setQuantity(0);
 			} else {
 				// Batch wird teilweise geleert
 				batch.setQuantity(currentBatchQty - remainingToIssue);

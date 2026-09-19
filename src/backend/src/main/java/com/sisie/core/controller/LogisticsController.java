@@ -1,5 +1,6 @@
 package com.sisie.core.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/logistics")
+@PreAuthorize("hasRole('ROLE_MANAGER')")
 @RequiredArgsConstructor
 public class LogisticsController {
 	
@@ -53,6 +55,7 @@ public class LogisticsController {
 	 * @param sku - product id
 	 * @return
 	 */
+	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
 	@GetMapping("/stock/{sku}")
 	public String getStock(@PathVariable String sku) {
 		

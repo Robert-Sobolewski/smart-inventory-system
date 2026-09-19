@@ -1,51 +1,48 @@
 # Project Status: Smart Inventory System for Industrial Electronics (SIS-IE)
-**Last Update:** September 2026 | **Developer:** Robert
+Last Updated: September 16, 2026
 
-## 1. Current Progress & History
-- **Phase 1 (Analysis):** COMPLETED ✅ (`docs/01_analysis/requirements.md`)
-- **Phase 2 (Design):** COMPLETED ✅ (`docs/02_design/database_model.md`)
-- **Phase 3 (Implementation):** IN PROGRESS 🚀
+## 🚀 Current Progress
+The project has evolved from a core logistics engine into a secure, enterprise-ready backend. The system now implements professional security standards and role-based access control.
 
-### Sprint 1: Core API & Foundation
-- [x] Project Setup with Java 25 LTS, Spring Boot 3.x, and SQLite.
-- [x] Implementation of `Product` and `Location` Entities.
-- [x] Creation of `ProductRepository` and `LocationRepository`.
-- [x] Configuration of Foreign Key enforcement in SQLite via `DatabaseConfig`.
-- [x] First API Endpoints for testing connectivity.
+### Completed Milestones
+- [x] **Phase 1: Analysis** -> `docs/01_analysis/requirements.md` finalized.
+- [x] **Project Structure** -> Professional layered architecture (`controller`, `service`, `repository`, `model`, `dto`).
+- [x] **Core Logistics Logic** -> FIFO (First-In-First-Out) implementation for goods receipt and issue.
+- [x] **Persistence Fix** -> Fixed bug in `InventoryService` where stock batches were not being saved to the DB.
+- [x] **Stock Tracking** -> Implemented `GET /api/logistics/stock/{sku}` using `@PathVariable`.
+- [x] **API Testing Suite** -> Created and versioned `.rest` files for executable documentation.
+- [x] **Sprint 3: Security & Access Management** -> 
+    - User Entity with Roles (`WAREHOUSE_WORKER`, `MANAGER`).
+    - JWT (JSON Web Token) Authentication implemented via `JwtTokenProvider`.
+    - Stateless Session Management using Spring Security.
+    - Role-Based Access Control (RBAC) via `@PreAuthorize` and `SecurityConfig`.
+    - Password Hashing using BCrypt.
 
-### Sprint 2: Inventory Logic (The Brain)
-- [x] Implementation of `StockBatch` Entity to support FIFO.
-- [x] Creation of `StockBatchRepository` with custom sorting (`findByProductOrderByReceivedDateAsc`).
-- [x] Development of the `InventoryService` implementing:
-    - **Goods Receipt:** Adding stock to specific locations.
-    - **FIFO Goods Issue:** Logic to deduct stock from oldest batches first.
-    - **Total Stock Calculation:** Aggregating quantities across all locations.
-- [x] Implementation of `LogisticsController` for external API access.
+## 🧠 Knowledge Base (Robert's Mental Model)
+The following architectural concepts have been mastered:
+- **Model**: Entities mapping directly to DB tables.
+- **Repository**: The exclusive bridge to the database; handles data access logic.
+- **Controller**: Entry points for API requests; uses `ResponseEntity` and DTOs for professional communication.
+- **Service**: The "Brain" of the app; contains all business logic (FIFO, Auth).
+- **DTO (Data Transfer Object)**: Used to decouple internal models from external API contracts (Security & Stability).
+- **JWT (JSON Web Token)**: Stateless authentication mechanism for scalable enterprise apps.
+- **RBAC (Role-Based Access Control)**: Restricting access based on user roles to ensure data integrity.
 
-## 2. Technical Stack & Architectural Decisions
-- **Backend:** Java 25 LTS, Spring Boot 3.x (STS/Eclipse).
-- **Database:** SQLite $\rightarrow$ PostgreSQL (via JPA/Hibernate).
-- **Architecture:** Layered Architecture (`model` $\rightarrow$ `repository` $\rightarrow$ `service` $\rightarrow$ `controller`).
-- **Key Patterns used:**
-    - **FIFO (First-In-First-Out):** Ensuring oldest stock is issued first.
-    - **Transactional Management:** Using `@Transactional` to ensure data integrity during complex movements.
-    - **Dependency Injection:** Decoupling components via Spring's IoC container.
-    - **Object-Relational Mapping (ORM):** Using Entities as "Pointers" to database rows.
+## 🛠️ Technical Stack
+- **Backend**: Java 21 / Spring Boot 3+
+- **Security**: Spring Security, JJWT (io.jsonwebtoken)
+- **Database**: PostgreSQL / H2 / SQLite (Local Dev)
+- **Testing**: IntelliJ/VS Code REST Client (`.rest` files)
+- **Build Tool**: Maven
 
-## 3. Learning Guide for Robert (The "Why")
-### Why a Service Layer?
-We don't put logic in the Controller because Controllers should only handle HTTP requests. The `InventoryService` contains the "Business Rules". This makes the code testable and reusable.
+## ⏭️ Next Steps: Sprint 4 - Advanced Features & Frontend Integration
+Now that the backend is secure, we move towards a complete product:
+1. **Frontend Setup**: Initialize React or Vue.js frontend to replace `.rest` tests with a real UI.
+2. **Advanced Inventory Logic**: Implement "Low-Stock Alerts" and "Defect Management".
+3. **Audit Logging**: Track who changed what in the inventory (Requirement NFR3).
+4. **API Documentation**: Integrate Swagger/OpenAPI for professional API specs.
 
-### Why StockBatches instead of just 'quantity'?
-If we only had a number (e.g., 100), we wouldn't know when they arrived. By using Batches, we track the `receivedDate`, which allows us to implement FIFO. This is critical for electronics with warranties or shelf-life.
-
-### Why @Transactional?
-Moving stock involves multiple steps (finding a batch, updating quantity). If the app crashes halfway, `@Transactional` rolls back everything so we don't "lose" items in the database.
-
-## 4. Pending Tasks & Roadmap
-1. **Sprint 3: Security & Management** (User roles, JWT Authentication, Audit Logs).
-2. **Sprint 4: Frontend Dashboard** (React/TypeScript UI to manage stock visually).
-3. **Final Polish:** Documentation and Portfolio optimization.
-
----
-**Next Step for Mentor:** Wait for Robert's review of the code and then proceed to Sprint 3 (Security) or refine current logic based on feedback.
+## 📌 Quick Start for Next Session
+1. Run the application.
+2. Login via `POST /api/auth/login` to get a JWT Token.
+3. Use the token in the Header (`Authorization: Bearer <token>`) to access protected endpoints like `/api/logistics/stock/{sku}`.

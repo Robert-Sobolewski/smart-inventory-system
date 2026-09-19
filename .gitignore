@@ -18,3 +18,10 @@ sisie_database.db
 .idea/
 out/
 status.md
+src/backend/.settings/.classpath
+.project
+.factorypath
+.settings/
+src/backend/.classpath
+src/backend/.factorypath
+src/backend/.project

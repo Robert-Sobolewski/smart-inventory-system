@@ -3,6 +3,7 @@ package com.sisie.core.controller;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequestMapping("/api/products")
+@PreAuthorize("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -32,6 +34,7 @@ public class ProductController {
 	 * 
 	 * @return Product
 	 */
+	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
 	@GetMapping("/{sku}")
 	public Product getProduct(@PathVariable String sku) {
 
@@ -45,6 +48,7 @@ public class ProductController {
 	 * 
 	 * @return - Bestaetingung erstellung Prozess
 	 */
+	@PreAuthorize("hasRole('ROLE_MANAGER')")
 	@PostMapping("/create")
 	public ResponseEntity<String> createProduct(@RequestBody ProductRequest request) {
 
@@ -60,6 +64,7 @@ public class ProductController {
 
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
 	@GetMapping("/test")
 	public String testDatabase() {
 
