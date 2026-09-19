@@ -7,13 +7,21 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.1.1</version>
 	</parent>
+
 	<groupId>com.sisie</groupId>
 	<artifactId>smart-inventory-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<properties>
-		<java.version>25</java.version>
+		<java.version>21</java.version>
+		<maven.compiler.release>21</maven.compiler.release>
+		<jacocoArgLine></jacocoArgLine>
 	</properties>
+
+	<!-- Dependencies -->
 	<dependencies>
+
+		<!-- Core Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
@@ -24,17 +32,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-maven-plugin</artifactId>
-			<version>4.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+
+		<!-- JWT & Security -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -52,10 +57,13 @@
 			<version>0.12.5</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- DB & Utilities -->
 		<dependency>
-			<groupId>org.hibernate.community</groupId>
+			<groupId>org.hibernate.orm</groupId> <!-- Zmień z
+			org.hibernate.community -->
 			<artifactId>hibernate-community-dialects</artifactId>
-			<version>7.4.8</version>
+			<version>7.4.8.Final</version> <!-- Pamiętaj o dopisku .Final -->
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -71,16 +79,84 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
-
+		<!-- Test Starter -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>4.1.1</version>
+			</plugin>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.xerial</groupId>
-				<artifactId>sqlite-jdbc</artifactId>
-				<version>3.53.2.1</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+			<!-- JaCoCo Plugin für die Coverage Berichte -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.15</version> <!-- Version with support Java 25 -->
+				<executions>
+					<!-- 1. Prepare agent before run tests -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<propertyName>jacocoArgLine</propertyName>
+						</configuration>
+					</execution>
+					<!-- 2. Raport generating -->
+					<execution>
+						<id>generate-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Run tests plugin (Surefire) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.0</version> <!-- Support Java 25 -->
+				<configuration>
+					<!-- Pass args from JaCoCo to JVM -->
+					<argLine>@{jacocoArgLine}</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>1.17.0</version> <!-- Wersja kompatybilna z Java 21 -->
+				<dependencies>
+					<!-- Wymagane, jeśli używasz JUnit 5 -->
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>1.2.1</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<!-- Ogranicz do Twojego pakietu, żeby oszczędzić czas -->
+					<targetClasses>
+						<param>com.sisie.*</param>
+					</targetClasses>
+					<targetTests>
+						<param>com.sisie.*</param>
+					</targetTests>
+					<mutators>
+						<value>STRONGER</value> <!-- Dobry, silny zestaw mutacji -->
+					</mutators>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+
 </project>
