@@ -27,13 +27,18 @@ public class AuthService {
 	 */
 	public AuthResponse login(String username, String rawPassword) {
 
+		// Input Validation - Fail Fast
+		if (username == null || username.isBlank() || rawPassword == null) {
+			throw new IllegalArgumentException("Username and Password are required");
+		}
+
 		// 1. Nutzer in der DB suchen
 		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new RuntimeException("Nutzer nicht gefunden: " + username));
+				.orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
 		// 2. Wenn user existieren , pruefen Passwort
 		if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-			throw new RuntimeException("Falsches Passwort!");
+			throw new RuntimeException("Invalid credentials");
 		}
 
 		// 3. Wenn alles ok ist , Token generieren und zurueckgeben
