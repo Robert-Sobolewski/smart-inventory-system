@@ -322,9 +322,8 @@ class InventoryServiceTest {
 		.thenReturn(List.of(mockStock1, mockStock2));
 		
 		// 2. Act
-		inventoryService.issueGoods(sku, requiredQty);
+		inventoryService.issueGoods(sku, requiredQty);		
 		
-		System.out.println("mstock1: "+ mockStock1.getQuantity()+", mstock2: "+mockStock2.getQuantity());
 		// 3. Assert
 		assertAll("Verify returned results",
 				() -> assertEquals(0, mockStock1.getQuantity(),"Stock must be empty."),
