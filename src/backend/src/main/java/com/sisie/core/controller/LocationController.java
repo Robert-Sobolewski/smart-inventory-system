@@ -43,18 +43,22 @@ public class LocationController {
 
 	@PostMapping("/create")
 	public ResponseEntity<String> createLocation(@RequestBody LocationCreateRequest request) {
-
-		// Prufen ob es sonst existiert
-		Optional<Location> exists = locationRepository.findByLocationCode(request.getLoc());
-
-		if (exists.isPresent()) {
-			throw new RuntimeException("Lagerplatz " + request.getLoc() + " existiert bereits!");
+		
+		if(request.getLocationCode() ==null || request.getLocationCode().isBlank())  {
+			throw new RuntimeException("locationCode can't be null or empty");
 		}
 
-		Location loc = Location.builder().locationCode(request.getLoc()).build();
+		// Prufen ob es sonst existiert
+		Optional<Location> exists = locationRepository.findByLocationCode(request.getLocationCode());
+
+		if (exists.isPresent()) {
+			throw new RuntimeException("Lagerplatz " + request.getLocationCode() + " existiert bereits!");
+		}
+
+		Location loc = Location.builder().locationCode(request.getLocationCode()).build();
 
 		locationRepository.save(loc);
 
-		return ResponseEntity.ok("Lagerplatz " + request.getLoc() + " wurde erfolgreich angelegt.");
+		return ResponseEntity.ok("Lagerplatz " + request.getLocationCode() + " wurde erfolgreich angelegt.");
 	}
 }
