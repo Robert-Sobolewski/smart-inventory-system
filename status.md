@@ -1,5 +1,5 @@
 # Project Status: Smart Inventory System for Industrial Electronics (SIS-IE)
-Last Updated: September 16, 2026
+Last Updated: September 20, 2026
 
 ## 🚀 Current Progress
 The project has evolved from a core logistics engine into a secure, enterprise-ready backend. The system now implements professional security standards and role-based access control.
@@ -17,6 +17,10 @@ The project has evolved from a core logistics engine into a secure, enterprise-r
     - Stateless Session Management using Spring Security.
     - Role-Based Access Control (RBAC) via `@PreAuthorize` and `SecurityConfig`.
     - Password Hashing using BCrypt.
+- [>] **Sprint 4: Quality Assurance & Testing** -> 
+    - Implementation of MVC Slice Tests for `LogisticsController`.
+    - Verification of Security Constraints (Role-based access).
+    - Integration of Mockito for service decoupling.
 
 ## 🧠 Knowledge Base (Robert's Mental Model)
 The following architectural concepts have been mastered:
@@ -27,16 +31,17 @@ The following architectural concepts have been mastered:
 - **DTO (Data Transfer Object)**: Used to decouple internal models from external API contracts (Security & Stability).
 - **JWT (JSON Web Token)**: Stateless authentication mechanism for scalable enterprise apps.
 - **RBAC (Role-Based Access Control)**: Restricting access based on user roles to ensure data integrity.
+- **MVC Slice Testing**: Using `@WebMvcTest` and `MockMvc` to verify API contracts without loading the full application context.
 
 ## 🛠️ Technical Stack
 - **Backend**: Java 21 / Spring Boot 3+
 - **Security**: Spring Security, JJWT (io.jsonwebtoken)
 - **Database**: PostgreSQL / H2 / SQLite (Local Dev)
-- **Testing**: IntelliJ/VS Code REST Client (`.rest` files)
+- **Testing**: JUnit 5, Mockito, JaCoCo, Pitest, IntelliJ/VS Code REST Client (`.rest` files)
 - **Build Tool**: Maven
 
 ## ⏭️ Next Steps: Sprint 4 - Advanced Features & Frontend Integration
-Now that the backend is secure, we move towards a complete product:
+Now that the backend is secure and partially tested, we move towards a complete product:
 1. **Frontend Setup**: Initialize React or Vue.js frontend to replace `.rest` tests with a real UI.
 2. **Advanced Inventory Logic**: Implement "Low-Stock Alerts" and "Defect Management".
 3. **Audit Logging**: Track who changed what in the inventory (Requirement NFR3).
@@ -45,4 +50,4 @@ Now that the backend is secure, we move towards a complete product:
 ## 📌 Quick Start for Next Session
 1. Run the application.
 2. Login via `POST /api/auth/login` to get a JWT Token.
-3. Use the token in the Header (`Authorization: Bearer <token>`) to access protected endpoints like `/api/logistics/stock/{sku}`.
+3. Use the token in the Header (`Authorization: Bearer ***`) to access protected endpoints like `/api/logistics/stock/{sku}`.
