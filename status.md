@@ -8,6 +8,7 @@ The project has evolved from a core logistics engine into a secure, enterprise-r
 - [x] **Phase 1: Analysis** -> `docs/01_analysis/requirements.md` finalized.
 - [x] **Project Structure** -> Professional layered architecture (`controller`, `service`, `repository`, `model`, `dto`).
 - [x] **Core Logistics Logic** -> FIFO (First-In-First-Out) implementation for goods receipt and issue.
+- [ ] **Supplier Management** -> Implementation of `Supplier` and `ProductSupplier` entities (Pending).
 - [x] **Persistence Fix** -> Fixed bug in `InventoryService` where stock batches were not being saved to the DB.
 - [x] **Stock Tracking** -> Implemented `GET /api/logistics/stock/{sku}` using `@PathVariable`.
 - [x] **API Testing Suite** -> Created and versioned `.rest` files for executable documentation.
