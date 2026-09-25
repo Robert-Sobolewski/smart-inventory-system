@@ -1,0 +1,34 @@
+
+<section class="inventory-container">
+<h2>Products Warehouse</h2>
+
+<!-- loading section-->
+@if(productResource.isLoading()){
+  <div class="loading-state" role="status">
+    <p>Connecting with Spring Boot backend... please wait</p>
+  </div>
+}
+<!-- error section -->
+@else if(productResource.error()){
+  <div class="error-state" role="alert">
+    <p>Connecting server error!</p>
+    <button (click)="productResource.reload()">Try again</button>
+  </div>
+}
+<!-- display data-->
+@else {
+  <div class="product-grid">
+    @for(product of productResource.value(); track product.id){
+      <article class="product-card">
+        <h3>{{product.name}}</h3>
+        <p>SKU: <code>{{product.sku}}</code></p>
+        <p>Quantity: <strong>{{ product.quantity}}</strong></p>
+        <p>Price: {{ product.price | currency: 'EUR'}}</p>
+      </article>
+    } @empty{
+      <p class="empty-msg">Warehouse is empty.</p>
+    }
+  </div>
+}
+
+</section>
