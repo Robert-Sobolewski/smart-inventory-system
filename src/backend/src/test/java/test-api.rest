@@ -7,12 +7,31 @@
 ### 1. AUTHENTICATION (The Gateway)
 # Goal: Get a JWT Token to access protected resources.
 # Expected Result: 200 OK with { "token": "eyJ..." }
+# user role_admin - admin, Admin123!
 POST http://localhost:8888/api/auth/login
 Content-Type: application/json
 
 {
     "username": "admin",
     "password": "Admin123!"
+}
+
+### get token for a user role_manager: manager, Manager123!
+POST http://localhost:8888/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "manager",
+    "password": "Manager123!"
+}
+
+### get token for a user role_worker: worker, Worker123!
+POST http://localhost:8888/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "worker",
+    "password": "Worker123!"
 }
 
 ### 2. SETUP: Create Location (Protected)
@@ -23,6 +42,16 @@ Authorization: Bearer <TOKEN>
 Content-Type: application/json
 
 {}
+
+
+### product test endpoint 
+GET http://localhost:8888/api/products/test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJtYW5hZ2VyIiwicm9sZSI6IlJPTEVfTUFOQUdFUiIsImlhdCI6MTc5MDQ1NjM3OSwiZXhwIjoxNzkwNTQyNzc5fQ.F1kADYHga4a9HuQ30Elvr6GHvFZ2vlztrdRT58NNjOrdaJmXWKaKAgH4KH5Du_A5
+
+### product test endpoint without token 
+GET http://localhost:8888/api/products/test
+
+
 
 ### 3. SETUP: Create Product (Protected)
 # Goal: Add a product to the catalog.

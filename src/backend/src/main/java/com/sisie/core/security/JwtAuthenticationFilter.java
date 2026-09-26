@@ -1,9 +1,10 @@
 package com.sisie.core.security;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -47,12 +48,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (token != null && tokenProvider.validateToken(token)) {
 
 			String username = tokenProvider.getUsernameFromJWT(token);
+                    String role = tokenProvider.getRoleFromJWT(token);
+                    List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
 			// Wir müssen Spring Security sagen, wer der Nutzer ist.
 			// Hier erstellen wir einen "Authentication"-Objekt für den aktuellen
 			// Request-Kontext.
 			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null,
-					Collections.emptyList()); // In einer vollen Version würden wir hier die Rollen hinzufügen
+                            authorities); // In einer vollen Version würden wir hier die Rollen hinzufügen
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 

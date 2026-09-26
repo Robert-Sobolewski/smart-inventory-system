@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sisie.core.dto.LocationCreateRequest;
@@ -19,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/locations")
-@PreAuthorize("hasRole('ROLE_MANAGER')")
+@PreAuthorize("hasRole('MANAGER')")
 @RequiredArgsConstructor
 public class LocationController {
 
@@ -27,7 +26,7 @@ public class LocationController {
 
 	
 	@GetMapping("/test")
-	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
 	public String testDatabase() {
 
 		// Ein location erstellen, Beispiel: "A-01-12" (Regal A, Ebene 1, Fach 12)

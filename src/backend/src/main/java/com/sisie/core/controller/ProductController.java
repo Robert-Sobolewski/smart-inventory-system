@@ -1,5 +1,6 @@
 package com.sisie.core.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
@@ -23,18 +24,30 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequestMapping("/api/products")
-@PreAuthorize("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
 @RequiredArgsConstructor
 public class ProductController {
 
 	private final ProductRepository productRepository;
+
+    /**
+     * Get all products.
+     *
+     * @return List of products
+     */
+    @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
+    @GetMapping
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
 
 	/**
 	 * Sucht ein Produkt ueber die SKU
 	 * 
 	 * @return Product
 	 */
-	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
 	@GetMapping("/{sku}")
 	public Product getProduct(@PathVariable String sku) {
 
@@ -48,7 +61,7 @@ public class ProductController {
 	 * 
 	 * @return - Bestaetingung erstellung Prozess
 	 */
-	@PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/create")
 	public ResponseEntity<String> createProduct(@RequestBody ProductRequest request) {
 
@@ -64,7 +77,7 @@ public class ProductController {
 
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_WORKER','ROLE_MANAGER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
 	@GetMapping("/test")
 	public String testDatabase() {
 
