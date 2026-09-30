@@ -2,6 +2,42 @@
 <section class="inventory-container">
 <h2>Products Warehouse</h2>
 
+<!-- add product form -->
+<form (submit)="onSubmit($event)" class="add-product-form" aria-label="Add new product">
+  <h3>Add Product</h3>
+
+  @if(savedMessage()){
+    <p class="success-msg" role="status">{{ savedMessage() }}</p>
+  }
+  @if(saveError()){
+    <p class="error-msg" role="alert">{{ saveError() }}</p>
+  }
+
+  <label for="sku">SKU</label>
+  <input id="sku" type="text" [formField]="productForm.sku" placeholder="e.g. RES-10K-OHM-001" />
+  @if (productForm.sku().touched() && productForm.sku().invalid()) {
+    @for (err of productForm.sku().errors(); track err.message) {
+      <p class="error-msg">{{ err.message }}</p>
+    }
+  }
+
+  <label for="name">Name</label>
+  <input id="name" type="text" [formField]="productForm.name" placeholder="e.g. Resistor 10k Ohm" />
+  @if (productForm.name().touched() && productForm.name().invalid()) {
+    @for (err of productForm.name().errors(); track err.message) {
+      <p class="error-msg">{{ err.message }}</p>
+    }
+  }
+
+  <label for="category">Category</label>
+  <input id="category" type="text" [formField]="productForm.category" placeholder="e.g. Passivbauelemente" />
+
+  <label for="description">Description</label>
+  <textarea id="description" rows="2" [formField]="productForm.description" placeholder="Technical details"></textarea>
+
+  <button type="submit" [disabled]="productForm().invalid()">Create Product</button>
+</form>
+
 <!-- loading section-->
 @if(productResource.isLoading()){
   <div class="loading-state" role="status">
@@ -22,8 +58,7 @@
       <article class="product-card">
         <h3>{{product.name}}</h3>
         <p>SKU: <code>{{product.sku}}</code></p>
-        <p>Quantity: <strong>{{ product.quantity}}</strong></p>
-        <p>Price: {{ product.price | currency: 'EUR'}}</p>
+        <p>Category: {{ product.category ?? '—' }}</p>
       </article>
     } @empty{
       <p class="empty-msg">Warehouse is empty.</p>
