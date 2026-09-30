@@ -8,7 +8,7 @@ import { inject, Injectable, Service, signal } from '@angular/core';
 export class AuthService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL = "http://localhost:8888/api/auth";
+  private readonly API_URL = "/api/auth";
 
   // signal store loginState true/false
   readonly isAuthenticated = signal<boolean>(this.hasToken());

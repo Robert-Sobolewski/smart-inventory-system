@@ -7,7 +7,7 @@ import { Product, ProductCreateRequest } from '../models/product';
 export class InventoryService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL = "http://127.0.0.1:8888/api/products";
+  private readonly API_URL = "/api/products";
 
   // Reactive resource that fetches the product list (auto-tracked by Angular)
   readonly productResource = httpResource<Product[]>(() => this.API_URL);
