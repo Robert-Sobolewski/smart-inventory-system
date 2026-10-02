@@ -1,10 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
+import { LoginData } from './login/types';
 
-// @Service()
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly API_URL = '/api/auth';
@@ -15,14 +13,22 @@ export class AuthService {
   constructor() {}
 
   // login method
-  login(credentials: any) {
-    return this.http.post<{ token: string }>(`${this.API_URL}/login`, credentials);
+  login(credentials: LoginData) {
+    return this.http.post<{ token: string; username: string }>(`${this.API_URL}/login`, credentials);
   }
 
   // save token in localStorage
-  saveToken(token: string) {
+  saveToken(token: string, username?: string) {
     localStorage.setItem('auth_token', token);
+    if (username) {
+      localStorage.setItem('auth_username', username);
+    }
     this.isAuthenticated.set(true);
+  }
+
+  // get username from localStorage
+  getUsername(): string | null {
+    return localStorage.getItem('auth_username');
   }
 
   // get token
@@ -33,6 +39,7 @@ export class AuthService {
   // logout
   logout() {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_username');
     this.isAuthenticated.set(false);
   }
 

@@ -1,12 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
-import { AuthService } from '../auth-service';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth-service';
+import { LoginData } from './types';
 
-interface LoginData{
-  username: string;
-  password: string;
-}
 
 @Component({
   imports: [FormField],
@@ -36,8 +33,8 @@ export class Login {
 
     this.authService.login(this.loginModel()).subscribe({
       next: (res) => {
-        // save token - isAthenticated = true
-        this.authService.saveToken(res.token);
+        // save token + username - isAuthenticated = true
+        this.authService.saveToken(res.token, res.username);
         this.router.navigate(['/products']);
       },
       error: () => this.authError.set("Invalid username or password")
