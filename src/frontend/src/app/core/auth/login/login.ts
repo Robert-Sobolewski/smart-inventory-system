@@ -1,12 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
-import { AuthService } from '../auth-service';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth-service';
+import { LoginData } from './types';
 
-interface LoginData{
-  username: string;
-  password: string;
-}
 
 @Component({
   imports: [FormField],

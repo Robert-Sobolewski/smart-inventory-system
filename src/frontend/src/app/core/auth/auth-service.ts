@@ -1,10 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
+import { LoginData } from './login/types';
 
-// @Service()
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly API_URL = '/api/auth';
@@ -15,7 +13,7 @@ export class AuthService {
   constructor() {}
 
   // login method
-  login(credentials: any) {
+  login(credentials: LoginData) {
     return this.http.post<{ token: string }>(`${this.API_URL}/login`, credentials);
   }
 
