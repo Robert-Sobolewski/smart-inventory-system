@@ -1,0 +1,30 @@
+
+<section class="login-container">
+  <h1>Smart Inventory System</h1>
+
+  <form (submit)="onSubmit($event)">
+    <label for="username">Username</label>
+    <input id="username" type="text" [formField]="loginForm.username" />
+
+    @if (loginForm.username().touched() && loginForm.username().invalid()) {
+      @for (err of loginForm.username().errors(); track err.message) {
+        <p class="error">{{ err.message }}</p>
+      }
+    }
+
+    <label for="password">Password</label>
+    <input id="password" type="password" [formField]="loginForm.password" />
+
+    @if (loginForm.password().touched() && loginForm.password().invalid()) {
+      @for (err of loginForm.password().errors(); track err.message) {
+        <p class="error">{{ err.message }}</p>
+      }
+    }
+
+    @if (authError()) {
+      <div role="alert" class="auth-error">{{ authError() }}</div>
+    }
+
+    <button type="submit" [disabled]="loginForm().invalid()">Log in</button>
+  </form>
+</section>

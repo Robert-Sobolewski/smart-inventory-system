@@ -1,0 +1,22 @@
+{
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/target": true,
+    "**/.settings": true,
+    "**/*.db": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/target": true,
+    "**/dist": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/target/**": true,
+    "**/.git/objects/**": true
+  },
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/target/**"
+  ]
+}

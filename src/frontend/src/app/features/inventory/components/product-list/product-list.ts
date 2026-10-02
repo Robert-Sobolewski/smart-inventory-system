@@ -1,16 +1,68 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { InventoryService } from '../../services/inventory-service';
-import { CurrencyPipe } from '@angular/common';
+import { ProductCreateRequest } from '../../models/product';
+
+// Local form model: all fields are plain strings (empty = not provided)
+interface ProductFormModel {
+  sku: string;
+  name: string;
+  category: string;
+  description: string;
+}
 
 @Component({
-  imports: [CurrencyPipe],
+  imports: [FormField],
   selector: 'app-product-list',
   styleUrl: './product-list.scss',
   templateUrl: './product-list.html',
-  standalone: true
 })
 export class ProductList {
 
-  protected readonly inventoryService = inject(InventoryService);
+  private readonly inventoryService = inject(InventoryService);
   protected readonly productResource = this.inventoryService.productResource;
+
+  // Form model for the "add product" form (signal-based)
+  protected readonly productModel = signal<ProductFormModel>({
+    sku: '', name: '', category: '', description: ''
+  });
+
+  // form validation
+  protected readonly productForm = form(this.productModel, f => {
+    required(f.sku, { message: 'SKU is required' });
+    required(f.name, { message: 'Name is required' });
+  });
+
+  // Feedback messages after a submit attempt
+  protected readonly saveError = signal<string | null>(null);
+  protected readonly savedMessage = signal<string | null>(null);
+
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    if (this.productForm().invalid()) return;
+
+    const m = this.productModel();
+    // Map empty strings to undefined so the backend stores NULL, not ""
+    const payload: ProductCreateRequest = {
+      sku: m.sku.trim(),
+      name: m.name.trim(),
+      category: m.category.trim() || undefined,
+      description: m.description.trim() || undefined
+    };
+
+    this.inventoryService.addProduct(payload).subscribe({
+      next: () => {
+        // Refresh the list so the new product shows up immediately
+        this.productResource.reload();
+        this.savedMessage.set(`Product ${payload.sku} created.`);
+        this.saveError.set(null);
+        this.productModel.set({ sku: '', name: '', category: '', description: '' });
+      },
+      error: (err) => {
+        // Backend rejects duplicate SKUs with an error message in the body
+        const msg = err?.error ?? 'Unknown server error';
+        this.saveError.set(typeof msg === 'string' ? msg : 'Could not create product.');
+      }
+    });
+  }
 }
