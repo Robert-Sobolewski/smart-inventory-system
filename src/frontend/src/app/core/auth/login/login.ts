@@ -33,8 +33,8 @@ export class Login {
 
     this.authService.login(this.loginModel()).subscribe({
       next: (res) => {
-        // save token - isAthenticated = true
-        this.authService.saveToken(res.token);
+        // save token + username - isAuthenticated = true
+        this.authService.saveToken(res.token, res.username);
         this.router.navigate(['/products']);
       },
       error: () => this.authError.set("Invalid username or password")

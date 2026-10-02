@@ -1,0 +1,16 @@
+<!-- BLED 1: <aside.login-status> brak spacji i class -> <aside class="..."> -->
+<aside class="status-bar">
+  <!-- BLED 2: isAuthenticated to SIGNAL - w template wywolujemy jak funkcje: isAuthenticated() -->
+  @if (isAuthenticated()) {
+    <div>
+      <!-- BLED 3: AuthService.username nie istnieje - dodalem getUsername(), wystawione jako username() -->
+      <h3>{{ username() }}</h3>
+      <!-- logout() sam w sobie nie robi redirectu - onLogout() = logout + navigate('/login') -->
+      <button type="button" (click)="onLogout()">Logout</button>
+    </div>
+  } @else {
+    <!-- BLED 4: <a href="/login"> = calkowity reload strony. routerLink = SPA, bez reloadu -->
+    <a routerLink="/login">Go to login page</a>
+  }
+</aside>
+
