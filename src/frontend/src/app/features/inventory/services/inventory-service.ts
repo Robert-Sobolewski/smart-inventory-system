@@ -1,13 +1,12 @@
-import { Service, inject } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
+import { Service, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Product, ProductCreateRequest } from '../models/product';
 
 @Service()
 export class InventoryService {
-
   private readonly http = inject(HttpClient);
-  private readonly API_URL = "/api/products";
+  private readonly API_URL = '/api/products';
 
   // Reactive resource that fetches the product list (auto-tracked by Angular)
   readonly productResource = httpResource<Product[]>(() => this.API_URL);
