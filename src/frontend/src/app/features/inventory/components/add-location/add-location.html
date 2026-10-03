@@ -1,0 +1,78 @@
+<section class="locations">
+  <h2>Add Location</h2>
+  <!-- create location form -->
+
+  <form (submit)="onSubmit($event)">
+    <h3>Create Location</h3>
+    @if(createMessage()){
+      <p class="success-msg" role="status">{{createMessage()}}</p>
+    }
+    @if(createError()){
+      <p class="error-msg" role="alert">{{createError()}}</p>
+    }
+    <label for="loc">Location</label>
+    <input type="text" id="loc" [formField]="locationForm.locationCode" placeholder="Location ex. A-1-012" />
+    @if(locationForm.locationCode().touched() && locationForm.locationCode().invalid()){
+      @for (err of locationForm.locationCode().errors(); track err.message){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <button type="submit" [disabled]="locationForm().invalid()">Create Location</button>
+  </form>
+
+  <!-- location list -->
+  @if(locationResource.isLoading()){
+    <div class="loading-state" role="status">
+      <p>Loading locations...</p>
+    </div>
+  } @else if(locationResource.error()){
+    <div class="error-state" role="alert">
+      <p>Could not load locations.</p>
+      <button (click)="locationResource.reload()">Try again</button>
+    </div>
+  } @else {
+    @if(updateMessage()){
+      <p class="success-msg" role="status">{{updateMessage()}}</p>
+    }
+    @if(updateError()){
+      <p class="error-msg" role="alert">{{updateError()}}</p>
+    }
+    <table class="locations-table" aria-label="All warehouse locations">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Location Code</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(location of locationResource.value(); track location.id){
+          <tr>
+            <td>{{location.id}}</td>
+            @if(editingId() === location.id){
+              <td>
+                <input type="text" [value]="editCode()" (change)="onEditCodeChange($event)" aria-label="Edit location code" />
+              </td>
+              <td class="row-actions">
+                <button type="button" (click)="onSaveEdit(location.id)">Save</button>
+                <button type="button" class="cancel-btn" (click)="onCancelEdit()">Cancel</button>
+              </td>
+            } @else {
+              <td><code>{{location.locationCode}}</code></td>
+              <td class="row-actions">
+                <button type="button" (click)="onEdit(location)">Edit</button>
+                <button type="button" class="delete-btn" (click)="onDeleteLocation(location)">Delete</button>
+              </td>
+            }
+          </tr>
+        } @empty{
+          <tr>
+            <td colspan="3" class="empty-msg">No locations yet.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</section>

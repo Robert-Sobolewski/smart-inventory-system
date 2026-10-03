@@ -11,6 +11,14 @@ export const routes: Routes = [
         (m) => m.ProductList,
       ),
   },
+  {
+    path: 'locations',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventory/components/add-location/add-location').then(
+        (m) => m.AddLocation,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'products' },
   { path: '**', redirectTo: 'login' },
 ];
