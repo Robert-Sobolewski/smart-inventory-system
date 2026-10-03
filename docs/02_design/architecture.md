@@ -23,3 +23,25 @@ The system follows a strict **Layered Architecture** to ensure separation of con
 3. **Service** calculates if new batches are needed and calls the Repository.
 4. **Repository** saves the data to the SQLite/PostgreSQL database.
 5. **Controller** returns a success message (`200 OK`).
+
+## 4. Frontend Architecture (Angular SPA)
+The client is an Angular 22 single-page application using standalone components and signals, organized by feature rather than by file type:
+
+```mermaid
+graph TD
+    subgraph SPA["Angular SPA"]
+        CORE["core/ — auth service, guard, HTTP interceptor (singletons, no UI)"]
+        FEAT["features/inventory/ — product list + add form (feature-scoped components, services, models)"]
+        SHARED["shared/components/ — status bar (reusable, feature-agnostic)"]
+    end
+    CORE -->|guards / intercepts| FEAT
+    FEAT -->|relative /api/* calls| PROXY["dev proxy (proxy.conf.json)"]
+    PROXY -->|forward :8888| API["Spring Boot REST API"]
+```
+
+- **`core/`**: application-wide singletons — `AuthService`, `authGuard`, the JWT HTTP interceptor. No feature logic, no UI beyond login.
+- **`features/inventory/`**: self-contained feature with its own components, services and models; talks to the backend only through relative URLs (`/api/products`).
+- **`shared/components/`**: reusable UI (status bar) that knows nothing about specific features — it reads auth state from `AuthService`.
+- **Development wiring**: `ng serve --proxy-config proxy.conf.json` forwards `/api/*` to the backend on port 8888, so no CORS configuration and no hard-coded host in frontend code. In production the same contract is served by a reverse proxy (see Roadmap Phase 5).
+
+This mirrors the backend's layering: `core` ≈ cross-cutting concerns, `features` ≈ controllers/services of the UI, `shared` ≈ reusable DTOs/components.

@@ -1,0 +1,79 @@
+// Add Location - feedback messages + form layout
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.success-msg {
+  color: #1b7f3b;
+  font-weight: 600;
+}
+
+.error-msg {
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+// Location list table
+.locations-table {
+  margin-top: 1.5rem;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 32rem;
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #ddd;
+  }
+
+  thead th {
+    font-weight: 600;
+    background-color: #f5f5f5;
+  }
+
+  code {
+    font-family: monospace;
+  }
+}
+
+.empty-msg {
+  color: #757575;
+  font-style: italic;
+}
+
+.loading-state,
+.error-state {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.error-state {
+  color: #c62828;
+}
+
+.row-actions {
+  white-space: nowrap;
+
+  button {
+    margin-right: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .cancel-btn {
+    background-color: #eee;
+    color: #333;
+  }
+
+  .delete-btn {
+    background-color: #c62828;
+    color: #fff;
+  }
+}

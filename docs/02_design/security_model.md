@@ -32,6 +32,12 @@ The system uses Role-Based Access Control to restrict access to sensitive operat
 - **JwtAuthenticationFilter**: A custom filter that intercepts every request, validates the JWT, and sets the `SecurityContext` for Spring Security.
 - **Stateless Policy**: `SessionCreationPolicy.STATELESS` ensures the server does not store any user state, making it ready for cloud deployment (Horizontal Scaling).
 
+## 4.1 Frontend Security Layer (Angular)
+The SPA mirrors the backend's token-based model on the client side:
+- **Token Storage**: After a successful login, `AuthService` stores the JWT and the username in `localStorage` (`auth_token`, `auth_username`). *Known trade-off*: `localStorage` is readable by JavaScript — acceptable for this internal tool; an in-memory store + refresh flow would be the hardening step.
+- **Auth Interceptor**: An HTTP interceptor attaches `Authorization: Bearer <token>` to every outgoing request automatically, so feature code never handles headers manually.
+- **Route Guard**: `authGuard` protects `/products`; without a stored token the router redirects to `/login`. The guard is a client-side convenience — the backend's RBAC remains the authoritative enforcement point (defense in depth).
+
 ## 5. Data Protection (GDPR/DSGVO)
 To comply with data protection standards:
 - Only necessary user data is stored.
