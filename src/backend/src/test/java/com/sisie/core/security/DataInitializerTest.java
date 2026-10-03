@@ -37,42 +37,43 @@ class DataInitializerTest {
 	@Test
 	@DisplayName("Should create admin user when no admin exist in DB")
 	void initDatabase_ShouldCreateAdminUserWhenNotExistInDB() throws Exception{
-		
+
 		// Setup
 		String username = "admin";
         String rawPassword = "Admin123!";
         String encodedPassword = "encoded_password_123";
-               
-        // admin not exist in DB
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        // no user exists in DB (admin, manager, worker)
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         // encode password
-        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
-        
+        when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
+
         // Act
         // create runner
         CommandLineRunner runner = dataInitializer.initDatabase(userRepository, passwordEncoder);
         runner.run();
-        
+
         // Assert
         verify(passwordEncoder).encode(rawPassword);
-        verify(userRepository, times(1)).save(any(User.class));
-		
+        // admin + manager + worker = 3 saves
+        verify(userRepository, times(3)).save(any(User.class));
+
 	}
-	
+
 	@Test
 	@DisplayName("Should not create admin user when admin already exist")
 	void initDatabase_ShouldNotCreateAdminUserWhenExist() throws Exception{
-		
+
 		// Setup
 		String username = "admin";
 		User mockAdmin = User.builder().username(username).build();
-		
-		when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockAdmin));
-		
+
+		when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(mockAdmin));
+
 		// Act
 		CommandLineRunner runner = dataInitializer.initDatabase(userRepository, passwordEncoder);
 		runner.run();
-		
+
 		// Assert
 		verifyNoInteractions(passwordEncoder);
 		verify(userRepository,never()).save(any(User.class));
