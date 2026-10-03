@@ -18,17 +18,26 @@ stop_backend() {
     local pid=$(find_pid)
     if [ -n "$pid" ]; then
         echo "Znajdzione PID: $pid -> zabijam..."
-        taskkill //F //PID "$pid"
+        # taskkill to natywny program Windows -> pojedyncze slaski (//F nie dziala w MSYS)
+        taskkill /F /PID "$pid"
         sleep 2
     else
         echo "Brak procesu na porcie $PORT (nic do robienia)."
     fi
 }
 
+# mvn (bash script) zawodzi pod MSYS (path conversion zlamuje glob boot/plexus-classworlds-*.jar),
+# wiec uzywamy wersji batch, jesli jest dostepna.
+if command -v mvn.cmd >/dev/null 2>&1; then
+    MVN=mvn.cmd
+else
+    MVN=mvn
+fi
+
 start_backend() {
     stop_backend
-    echo "Startuje backend (mvn spring-boot:run)..."
-    mvn spring-boot:run
+    echo "Startuje backend ($MVN spring-boot:run)..."
+    $MVN spring-boot:run
 }
 
 case "$1" in
