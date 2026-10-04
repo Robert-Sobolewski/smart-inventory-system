@@ -36,6 +36,7 @@ To ensure the application is deployable in corporate environments, we will imple
 - **Pipeline Stages**: `Build` $\rightarrow$ `Test (JUnit/JaCoCo)` $\rightarrow$ `Security Scan` $\rightarrow$ `Docker Build` $\rightarrow$ `Deploy`.
 
 ## 4. Phase 6: Advanced Features & Final Polish
+- [ ] **Multi-Warehouse Support**: Introduce a `Warehouse` entity (e.g. codes `WAW`, `BIA`) with `Location @ManyToOne Warehouse`. Uniqueness of `locationCode` changes from global to per-warehouse pair `(warehouse, locationCode)`; stock queries and UI filters gain a warehouse dimension; existing data migrates into a default warehouse. See `01_analysis/requirements.md` §5 (A1/A2) for the v1 single-warehouse decision this roadmap item supersedes.
 - [ ] **Audit Logging**: Implement a system to track every change in the inventory for compliance (GDPR/ISO).
 - [ ] **Low-Stock Alerts**: Automated notifications when stock falls below a threshold.
 - [ ] **API Documentation**: Integration of Swagger/OpenAPI 3.0 for professional API specs.

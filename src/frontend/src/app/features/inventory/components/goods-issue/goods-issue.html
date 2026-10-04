@@ -1,0 +1,47 @@
+<section class="goods-issue">
+  <h2>Goods Issue (Warenausgang)</h2>
+
+  <!-- issue goods form — FIFO: lokalizacji nie wybieramy, backend sam bierze od najstarszych batchy -->
+  <form (submit)="onSubmit($event)">
+    <h3>Issue Goods</h3>
+    @if(issueMessage()){
+      <p class="success-msg" role="status">{{issueMessage()}}</p>
+    }
+    @if(issueError()){
+      <p class="error-msg" role="alert">{{issueError()}}</p>
+    }
+
+    <label for="sku">Product (SKU)</label>
+    <input type="text" id="sku" [formField]="issueForm.sku" placeholder="SKU ex. SKU-001" (change)="onSkuChange($event)" />
+    @if(issueForm.sku().touched() && issueForm.sku().invalid()){
+      @for (err of issueForm.sku().errors(); track err.kind){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <!-- stock preview: aktualny stan z GET /stock/{sku} — podstawa alertu braku towaru -->
+    @if(stockLoading()){
+      <div class="stock-state" role="status">Checking stock...</div>
+    } @else if(stockError()){
+      <div class="stock-error" role="alert">{{stockError()}}</div>
+    } @else if(stockAvailable() !== null){
+      <div class="stock-state" role="status">Verfuegbar: {{stockAvailable()}} Stueck</div>
+    }
+
+    <label for="qty">Quantity</label>
+    <input type="number" id="qty" [formField]="issueForm.qty" step="1" placeholder="ex. 50" />
+    @if(issueForm.qty().touched() && issueForm.qty().invalid()){
+      @for (err of issueForm.qty().errors(); track err.kind){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <!-- alert braku towaru: qty > stan -> submit zablokowany (decyzja v1: all-or-nothing) -->
+    @if(overStock()){
+      <div class="stock-error" role="alert">Nicht genug Bestand! Verfuegbar: {{stockAvailable()}}, gewuenscht: {{issueModel().qty}}.</div>
+    }
+
+    <button type="submit" [disabled]="!canSubmit()">Issue Goods</button>
+  </form>
+
+</section>

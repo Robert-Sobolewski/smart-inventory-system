@@ -1,0 +1,62 @@
+<section class="goods-receipt">
+  <h2>Goods Receipt (Wareneingang)</h2>
+
+  <!-- receive goods form -->
+  <form (submit)="onSubmit($event)">
+    <h3>Receive Goods</h3>
+    @if(receiveMessage()){
+      <p class="success-msg" role="status">{{receiveMessage()}}</p>
+    }
+    @if(receiveError()){
+      <p class="error-msg" role="alert">{{receiveError()}}</p>
+    }
+
+    <label for="sku">Product (SKU)</label>
+    <input type="text" id="sku" [formField]="receiptForm.sku" placeholder="SKU ex. SKU-001" />
+    @if(receiptForm.sku().touched() && receiptForm.sku().invalid()){
+      @for (err of receiptForm.sku().errors(); track err.kind){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <label for="loc">Location</label>
+    <!-- dropdown z listą lokalizacji z backendu; brak miejsca = manager zakłada je na /locations -->
+    @if(locationResource.isLoading()){
+      <select id="loc" disabled aria-label="Loading locations">
+        <option value="">Loading locations...</option>
+      </select>
+    } @else if(locationResource.error()){
+      <p class="error-msg">Could not load locations. <a routerLink="/locations">Open locations</a></p>
+    } @else {
+      <select id="loc" [formField]="receiptForm.loc">
+        <option value="" disabled>Select a location...</option>
+        @for(location of locationResource.value(); track location.id){
+          <option [value]="location.locationCode">{{location.locationCode}}</option>
+        }
+      </select>
+    }
+    @if(receiptForm.loc().touched() && receiptForm.loc().invalid()){
+      @for (err of receiptForm.loc().errors(); track err.kind){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <label for="qty">Quantity</label>
+    <input type="number" id="qty" [formField]="receiptForm.qty" step="1" placeholder="ex. 50" />
+    @if(receiptForm.qty().touched() && receiptForm.qty().invalid()){
+      @for (err of receiptForm.qty().errors(); track err.kind){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <button type="submit" [disabled]="receiptForm().invalid()">Receive Goods</button>
+  </form>
+
+  <!-- hint: brak miejsca w magazynie -->
+  @if(hasNoLocations()){
+    <div class="hint-state" role="note">
+      <p>No locations yet. Create one first on the <a routerLink="/locations">Locations</a> page.</p>
+    </div>
+  }
+
+</section>
