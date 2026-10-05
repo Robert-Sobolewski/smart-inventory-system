@@ -3,9 +3,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { Status } from './shared/components/status/status';
+import { Nav } from './shared/components/nav/nav';
 
 @Component({
-  imports: [RouterOutlet, Status],
+  imports: [RouterOutlet, Status, Nav],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',

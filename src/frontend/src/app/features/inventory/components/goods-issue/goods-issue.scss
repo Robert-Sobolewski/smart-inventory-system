@@ -1,0 +1,35 @@
+// Goods Issue - feedback messages + form layout (spójne z goods-receipt.scss)
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.success-msg {
+  color: #1b7f3b;
+  font-weight: 600;
+}
+
+.error-msg {
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+// stock preview (Verfuegbar: N Stueck) — neutralny stan informacyjny
+.stock-state {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background-color: #e8f0fe;
+  color: #1a3d7c;
+  font-size: 0.9rem;
+}
+
+// alert braku towaru / błąd pobrania stanu
+.stock-error {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background-color: #fdecea;
+  color: #c62828;
+  font-size: 0.9rem;
+}

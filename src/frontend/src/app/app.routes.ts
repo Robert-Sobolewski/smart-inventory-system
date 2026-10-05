@@ -19,6 +19,22 @@ export const routes: Routes = [
         (m) => m.AddLocation,
       ),
   },
+  {
+    path: 'logistics/receive',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventory/components/goods-receipt/goods-receipt').then(
+        (m) => m.GoodsReceipt,
+      ),
+  },
+  {
+    path: 'logistics/issue',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventory/components/goods-issue/goods-issue').then(
+        (m) => m.GoodsIssue,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'products' },
   { path: '**', redirectTo: 'login' },
 ];
