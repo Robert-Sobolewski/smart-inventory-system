@@ -18,7 +18,7 @@ Oba formularze działają end-to-end (przyjęcie 2026-10-04 rano, wydanie po po�
   - Error path przez UI: nieznany SKU → czerwone „Product mit sku: NOPE-999 nicht gefunden!" (przyjęcie) / „Product sku: NOPE-999 nicht gefunden!" (podgląd wydania).
 
 ### ⏭️ Następne kroki (do wyboru z użytkownikiem)
-1. Nawigacja w UI — linki do `/logistics/receive` i `/logistics/issue` w menu/aplikacji (teraz tylko po bezpośrednim URL-u).
+1. ✅ **Nawigacja w UI** — komponent `Nav` (`shared/components/nav`) z linkami do `/products`, `/locations`, `/logistics/receive`, `/logistics/issue`; aktywna pozycja podświetlona (`routerLinkActive`), menu ukryte na `/login`. Zrobione 2026-10-05.
 2. Przenieść logikę biznesową Location z controllera do `LocationService` (standard IHK, semantyczna walidacja w service) — odłożone od fazy CRUD.
 3. Kolejna encja CRUD (Supplier — wciąż Pending w milestone'ach) / Audit Logging (NFR3) / Swagger-OpenAPI.
 
@@ -132,7 +132,8 @@ src/frontend/src/app/features/inventory/
 ├── components/goods-issue/{goods-issue.ts,.html,.scss,.spec.ts}     # route /logistics/issue (Warenausgang, FIFO + alert braku towaru) ✅ 2026-10-04
 └── services/
     ├── add-location-service{.ts,.spec.ts}                           # locationResource + create/update/delete
-    └── logistics-service.ts                                         # receiveGoods() + locationResource (dropdown)
+    └── logistics-service.ts                                         # receiveGoods() + issueGoods() + getStock() + locationResource
+src/frontend/src/app/shared/components/nav/{nav.ts,.html,.scss,.spec.ts}  # menu główne (routerLinkActive), ukryte na /login ✅ 2026-10-05
 ```
 
 ## 🗄️ Baza (SQLite) — lokalizacje obecne
