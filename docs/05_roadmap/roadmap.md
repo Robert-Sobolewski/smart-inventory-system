@@ -19,7 +19,7 @@ Following the latest market analysis for 2026, the project has migrated to a mod
 - [x] Implement a secure Login Page integrated with the JWT Backend (JWT interceptor + route guard on `/products`).
 - [x] Product list with signal-based "add product" form (`features/inventory`), served via dev proxy (`proxy.conf.json`).
 - [ ] Create a Dashboard for real-time stock overview using Signals.
-- [ ] Build "Goods Receipt" and "Issue" forms with Signal-based validation (backend endpoints `/api/logistics/receive` / `/issue` already exist).
+- [x] Build "Goods Receipt" and "Issue" forms with Signal-based validation (backend endpoints `/api/logistics/receive` / `/issue` already exist). Implemented in `features/inventory/components/goods-receipt/` and `goods-issue/`: signal-based forms, live stock preview (`GET /stock/{sku}`), out-of-stock alert disabling submit, MANAGER-only routes.
 
 ### 2.3 Open Decisions
 - [ ] Frontend test strategy: component tests for login / product-list / status are missing; decide between Karma/Jasmine (default) and Vitest.
