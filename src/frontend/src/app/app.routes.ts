@@ -4,6 +4,14 @@ import { authGuard } from './core/auth/auth.guard';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./core/auth/login/login').then((m) => m.Login) },
   {
+    path: 'dashboard',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventory/components/dashboard/dashboard').then(
+        (m) => m.Dashboard,
+      ),
+  },
+  {
     path: 'products',
     canActivate: [authGuard], // <- guard: bez tokena redirect na /login
     loadComponent: () =>

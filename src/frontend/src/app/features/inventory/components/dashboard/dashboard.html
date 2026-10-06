@@ -1,0 +1,69 @@
+<section class="dashboard-container" aria-label="Lager-Dashboard">
+  <h2>Lager-Dashboard</h2>
+
+  @if (stockOverview.isLoading()) {
+    <p role="status">Daten werden geladen&hellip;</p>
+  } @else if (stockOverview.error()) {
+    <div class="error-box" role="alert">
+      <p>Fehler beim Laden der Dashboard-Daten.</p>
+      <button type="button" (click)="stockOverview.reload()">Erneut versuchen</button>
+    </div>
+  } @else {
+    <!-- Kennzahlen -->
+    <dl class="kpi-grid">
+      <div class="kpi-card">
+        <dt>Produkte</dt>
+        <dd>{{ sortedRows().length }}</dd>
+      </div>
+      <div class="kpi-card">
+        <dt>Gesamtbestand (Stueck)</dt>
+        <dd>{{ totalUnits() ?? 0 }}</dd>
+      </div>
+      <div class="kpi-card">
+        <dt>Lagerplaetze</dt>
+        <dd>{{ locationCount.value() ?? 0 }}</dd>
+      </div>
+      <div class="kpi-card kpi-warning" [class.kpi-critical]="(lowStockCount() ?? 0) > 0">
+        <dt>Low-Stock-Warnungen</dt>
+        <dd>{{ lowStockCount() ?? 0 }}</dd>
+      </div>
+    </dl>
+
+    <!-- Bestandsuebersicht -->
+    <h3>Bestandsuebersicht</h3>
+    @if (sortedRows().length === 0) {
+      <p>Noch keine Produkte im System.</p>
+    } @else {
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th scope="col">SKU</th>
+            <th scope="col">Name</th>
+            <th scope="col">Kategorie</th>
+            <th scope="col" class="num">Bestand (Stueck)</th>
+            <th scope="col" class="num">Mindestbestand</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of sortedRows(); track row.sku) {
+            <tr [class.low-stock]="row.lowStock">
+              <td>{{ row.sku }}</td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.category ?? '—' }}</td>
+              <td class="num">{{ row.totalQuantity }}</td>
+              <td class="num">{{ row.minStockLevel }}</td>
+              <td>
+                @if (row.lowStock) {
+                  <span class="badge badge-warning" role="status">Low Stock</span>
+                } @else {
+                  <span class="badge badge-ok" role="status">OK</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</section>
