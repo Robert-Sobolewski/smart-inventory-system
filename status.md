@@ -1,6 +1,35 @@
-# STATUS — smart-inventory-system (stan na 2026-10-04)
+# STATUS — smart-inventory-system (stan na 2026-10-06)
 
-## 🎯 Bieżąca faza: Logistyka — przyjęcie + wydanie towaru — ✅ ZAKOŃCZONE I ZWERYFIKOWANE
+## 🎯 Bieżąca faza: Dashboard — ✅ ZAKOŃCZONE I ZWERYFIKOWANE (commit `84a6efa`)
+Read-only dashboard z KPI i tabelą stanów. Działa end-to-end (zweryfikowane w przeglądarce 2026-10-06).
+
+### Co zrobione i zweryfikowane
+- **Backend** (`/api/dashboard`, role WORKER/MANAGER/ADMIN):
+  - `StockSummaryItem` DTO: `{sku, name, category, totalQuantity, minStockLevel, lowStock}`.
+  - `DashboardService`: agreguje stan per produkt (suma batchy), liczy low-stock (`total < minStockLevel`, default 10 gdy NULL).
+  - `DashboardController`: `GET /stock-overview` (lista), `GET /location-count`. Cienki controller — logika w serwisie (standard IHK).
+- **Frontend** (`features/inventory/components/dashboard/` + `services/dashboard-service.ts`):
+  - `httpResource<StockSummaryItem[]>` (Angular 22 signals) — auto-reactive, `.reload()` przy błędzie.
+  - KPI cards: Produkty / Gesamtbestand / Lagerplätze / Low-Stock-Warnungen; tabela sortowana low-stock-first + badge OK/Low Stock.
+  - Route `/dashboard` + link w `nav.html`.
+- **Weryfikacja (empiryczna):**
+  - `ng build` ✅, pełny zestaw testów frontendu: **14/14 passed** (12 plików).
+  - E2E: KPI = 5 produktów / 23 szt. / 4 lokalizacje / 3 low-stock — spójne z danymi backendu; tabela renderuje poprawnie, sortowanie działa.
+
+### ⚠️ PITFALL (nowy): serwis bez `@Service()` → NG0201
+Klasa serwisowa z `httpResource` **bez dekoratora** nie jest rejestrowana w DI — komponent dostaje `NG0201: No provider found for DashboardService`. Objaw: pusta strona + błąd w konsoli, build przechodzi (błąd runtime). Fix: `@Service()` z `@angular/core` (spójne z `InventoryService`).
+
+### ⏭️ Następne kroki
+1. ✅ **Nawigacja w UI** — komponent `Nav` (`shared/components/nav`) + link Dashboard; aktywna pozycja podświetlona, menu ukryte na `/login`. Zrobione 2026-10-05/06.
+2. Przenieść logikę biznesową Location z controllera do `LocationService` (standard IHK) — odłożone.
+3. Faza 5: Docker + CI/CD (GitHub Actions). Potem Phase 6: Multi-Warehouse / Audit Logging / Swagger.
+
+### Testy frontendu — stan po poprawkach użytkownika (2026-10-06)
+Użytkownik skonfigurował **Vitest coverage** (`vitest.config.ts` + `test-setup.ts`, `@vitest/coverage-v8`) i naprawił 3 wcześniej padające specy (app/login/auth-service — localStorage). Obecnie: **14/14 passed**, `ng test frontend --watch=false --coverage` działa.
+
+---
+
+## ✅ Poprzednia faza: Logistyka — przyjęcie + wydanie towaru — ZAKOŃCZONE I ZWERYFIKOWANE (2026-10-04)
 Oba formularze działają end-to-end (przyjęcie 2026-10-04 rano, wydanie po południu).
 
 ### Co zrobione i zweryfikowane
