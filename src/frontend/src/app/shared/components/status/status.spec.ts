@@ -1,23 +1,31 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth-service';
 import { Status } from './status';
 
 describe('Status', () => {
   let mockAuthService: any;
+  let mockRouter: any;
 
   beforeEach(async () => {
-
+    // vi.fn() tworzy SPY — zapisuje każde wywołanie, więc możemy na nie assertować.
+    // Zwykła strzałka (logout: () => {...}) niczego NIE zapisuje — dlatego
+    // .toHaveBeenCalled() rzucał "is not a spy or a call to a spy".
     mockAuthService = {
       isAuthenticated: signal(true),
-      getUsername: ()=> "manager"
-    }
+      getUsername: () => 'manager',
+      logout: vi.fn(),
+    };
+    mockRouter = {
+      navigate: vi.fn(),
+    };
     await TestBed.configureTestingModule({
       imports: [Status],
-      providers: [provideRouter([]),
-    {provide: AuthService, useValue:mockAuthService}
-    ],
+      providers: [
+        { provide: Router, useValue: mockRouter },
+        { provide: AuthService, useValue: mockAuthService },
+      ],
     }).compileComponents();
   });
 
@@ -40,4 +48,14 @@ describe('Status', () => {
     expect(h3?.textContent).toContain("manager")
     expect(button?.textContent).toContain("Logout");
   })
+
+  it('should call authService.logout() and router.navigate("/login")', () => {
+    const fixture = TestBed.createComponent(Status);
+    const component = fixture.componentInstance;
+    component.onLogout();
+
+    // Oba są teraz spy'ami, więc możemy assertować na ich wywołaniach.
+    expect(mockAuthService.logout).toHaveBeenCalledTimes(1);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
+  });
 });
