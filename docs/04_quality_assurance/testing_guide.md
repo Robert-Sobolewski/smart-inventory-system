@@ -80,6 +80,16 @@ describe('LogisticsService', () => {
 1. **`provideHttpClient` jest w `@angular/common/http`, NIE w `/testing`.** Import z `/testing` da błąd kompilacji (TS2305). To najczęstszy błąd przy pierwszym teście serwisu.
 2. **Plain text vs JSON.** Backend zwraca `ResponseEntity<String>` = plain text. Serwis używa `{ responseType: 'text' }`. W teście `req.flush(...)` musi więc dostarczać **tekst**, nie obiekt — inaczej test nie odzwierciedla rzeczywistości.
 3. **`httpResource` (nie Observable).** Pola typu `readonly locationResource = httpResource<...>()` to *sygnały*, nie Observable. Nie mockujesz ich przez `HttpTestingController.flush` wprost — sprawdzasz je po `fixture.detectChanges()` jako `component.locationResource.value()`.
+4. **⚠️ `httpResource` wysyła GET ASYNCHRONICZNIE (efekty Angulara).** Jeśli serwis ma pole `httpResource`, to przy `TestBed.inject(Serwis)` request GET idzie do kolejki testing backendu — ale **nie synchronicznie** (nie da się go `expectOne().flush()` w `beforeEach` — rzuca "found none"). Rozwiązanie: w `afterEach` drenuj pozostałe requesty PRZED `verify()`:
+   ```ts
+   afterEach(() => {
+     for (const req of httpMock.match('/api/locations')) {
+       req.flush([]); // symulowana odpowiedź dla auto-fetch z httpResource
+     }
+     httpMock.verify(); // teraz kolejka jest pusta → nie ma "open requests"
+   });
+   ```
+5. **Kolejność: najpierw wywołaj metodę, potem `expectOne`, potem `flush`.** `firstValueFrom(...)` subskrybuje **natychmiast** — request idzie do kolejki w momencie wywołania metody serwisu. Jeśli zrobisz `expectOne()` PRZED wywołaniem → "found none" (request jeszcze nie istnieje). Jeśli zapomnisz `flush()` → Observable nigdy nie emituje → **timeout 5000ms**.
 
 ---
 
