@@ -20,22 +20,22 @@ interface ProductFormModel {
 export class ProductList {
 
   private readonly inventoryService = inject(InventoryService);
-  protected readonly productResource = this.inventoryService.productResource;
+  readonly productResource = this.inventoryService.productResource;
 
   // Form model for the "add product" form (signal-based)
-  protected readonly productModel = signal<ProductFormModel>({
+  readonly productModel = signal<ProductFormModel>({
     sku: '', name: '', category: '', description: ''
   });
 
   // form validation
-  protected readonly productForm = form(this.productModel, f => {
+  readonly productForm = form(this.productModel, f => {
     required(f.sku, { message: 'SKU is required' });
     required(f.name, { message: 'Name is required' });
   });
 
   // Feedback messages after a submit attempt
-  protected readonly saveError = signal<string | null>(null);
-  protected readonly savedMessage = signal<string | null>(null);
+  readonly saveError = signal<string | null>(null);
+  readonly savedMessage = signal<string | null>(null);
 
   onSubmit(event: Event): void {
     event.preventDefault();

@@ -17,25 +17,25 @@ export class AddLocation {
   private readonly locationService = inject(AddLocationService);
 
   // Reactive list of all locations (auto-tracked by Angular)
-  protected readonly locationResource = this.locationService.locationResource;
+  readonly locationResource = this.locationService.locationResource;
 
   // form model for 'add location'
-  protected readonly locationModel = signal<LocationFormModel>({locationCode:""});
+  readonly locationModel = signal<LocationFormModel>({locationCode:""});
 
   // form validation
-  protected readonly locationForm = form(this.locationModel,f=>{
+  readonly locationForm = form(this.locationModel,f=>{
     required(f.locationCode,{message: "Location is required"})
   });
 
   // Feedback messages after a submit attempt
-  protected readonly createError = signal<string | null>(null);
-  protected readonly createMessage = signal<string | null>(null);
+  readonly createError = signal<string | null>(null);
+  readonly createMessage = signal<string | null>(null);
 
   // Edit state: which row is currently being edited + the code being typed
-  protected readonly editingId = signal<number | null>(null);
-  protected readonly editCode = signal('');
-  protected readonly updateError = signal<string | null>(null);
-  protected readonly updateMessage = signal<string | null>(null);
+  readonly editingId = signal<number | null>(null);
+  readonly editCode = signal('');
+  readonly updateError = signal<string | null>(null);
+  readonly updateMessage = signal<string | null>(null);
 
   onEdit(location: { id: number; locationCode: string }): void {
     this.editingId.set(location.id);
@@ -103,23 +103,35 @@ export class AddLocation {
         this.locationResource.reload();
       },
       error: (err) => {
-        let body = err?.error;
-        if (typeof body === 'string') {
-          // responseType 'text' -> body jest surowym stringiem, nawet przy 400.
-          try {
-            const parsed = JSON.parse(body);
-            if (parsed && typeof parsed.message === 'string') {
-              this.updateError.set(parsed.message);
-              return;
-            }
-          } catch { /* nie jest JSON -> plain-text błąd */ }
-          this.updateError.set(body.length > 0 ? body : "Could not delete location");
-        } else if (body && typeof body.message === 'string') {
-          // np. guard: "Lagerplatz ID X kann nicht geloescht werden..."
-          this.updateError.set(body.message);
-        } else {
-          this.updateError.set("Could not delete location");
-        }
+       let body = err?.error;
+
+       // 1. Handle String (Raw or JSON)
+       if (typeof body === 'string') {
+         try {
+           const parsed = JSON.parse(body);
+           if (parsed && typeof parsed.message === 'string') {
+             this.updateError.set(parsed.message);
+             return;
+           }
+         } catch {
+           // Not JSON, treat as plain text
+         }
+         this.updateError.set(body.length > 0 ? body : 'Could not delete location');
+       }
+       // 2. Handle Object (e.g., { message: "..." } or { error: "..." })
+       else if (body && typeof body === 'object') {
+         // Check for common keys: .message, .error, or .description
+         const msg = body.message || body.error || body.description;
+         if (typeof msg === 'string' && msg.length > 0) {
+           this.updateError.set(msg);
+         } else {
+           this.updateError.set('Could not delete location');
+         }
+       }
+       // 3. Fallback for everything else (null, undefined, numbers)
+       else {
+         this.updateError.set('Could not delete location');
+       }
       }
     });
   }
