@@ -55,4 +55,27 @@ describe('AddLocationService', () => {
 
     expect(await resultPromise).toBe(expectedResponse);
   });
+
+  it('should call updateLocation and return success string', async () => {
+    const locationId = 1;
+    const updatedLocationCode = 'A-1-013';
+    const expectResponse = `Lagerplatz ID ${locationId} + wurde erfolgreich aktualisiert.`;
+    const resultPromise = firstValueFrom(service.updateLocation(locationId, updatedLocationCode));
+
+    const req = httpMock.expectOne(`/api/locations/${locationId}`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ locationCode: updatedLocationCode });
+    req.flush(expectResponse);
+    expect(await resultPromise).toBe(expectResponse);
+  });
+
+  it('should call deleteLocation and return success string', async () => {
+    const locationId = 1;
+    const expectResponse = `Lagerplatz ID ${locationId} wurde erfolgreich geloescht.`;
+    const resultPromise = firstValueFrom(service.deleteLocation(locationId));
+    const req = httpMock.expectOne(`/api/locations/${locationId}`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(expectResponse);
+    expect(await resultPromise).toBe(expectResponse);
+  });
 });
