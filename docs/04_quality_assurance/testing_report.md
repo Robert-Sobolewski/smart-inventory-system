@@ -1,5 +1,5 @@
 # Quality Assurance & Testing Report - SIS-IE
-Last Updated: September 20, 2026
+Last Updated: October 14, 2026
 
 ## 1. Testing Strategy
 To ensure industrial stability and maintainability, a **Testing Pyramid** approach was implemented. This ensures that logic is verified at the lowest possible level before being tested in integration.
@@ -24,3 +24,13 @@ The high coverage rate proves that the system is robust against regressions. The
 
 ## 3. Mutation Testing (Pitest)
 To ensure the *quality* of the tests, **Pitest** was integrated. This prevents "fake coverage" by introducing mutants into the code to see if the tests can detect them.
+
+## 4. Frontend Testing (Angular 22 + Vitest)
+The Angular SPA is tested with **Vitest** (`@analogjs/vite-plugin-angular`, jsdom environment — config in `src/frontend/vitest.config.ts`). Status as of October 14, 2026:
+
+- **15 spec files / 116 tests — all passing** (`yarn test:run` in `src/frontend/`)
+- Coverage via `@vitest/coverage-v8` (`yarn test:coverage`, HTML report in `coverage/`)
+- Service specs use `HttpTestingController` + `provideHttpClientTesting()` (Angular 22 subpath `@angular/common/http/testing`) — no network, deterministic
+- Component specs render real templates with mocked services; signal-based resources are tested through their public API (`value()`, `isLoading()`, `reload()`)
+
+> Note: `ng test` also works (same specs, full type checking) but uses its own zone.js environment and does not load `src/test-setup.ts`; the Vitest commands in `package.json` are the source of truth for "tests pass".

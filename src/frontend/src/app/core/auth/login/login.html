@@ -4,7 +4,7 @@
 
   <form (submit)="onSubmit($event)">
     <label for="username">Username</label>
-    <input id="username" type="text" [formField]="loginForm.username" />
+    <input id="username" data-testid="username-input" type="text" [formField]="loginForm.username" />
 
     @if (loginForm.username().touched() && loginForm.username().invalid()) {
       @for (err of loginForm.username().errors(); track err.message) {
@@ -13,7 +13,7 @@
     }
 
     <label for="password">Password</label>
-    <input id="password" type="password" [formField]="loginForm.password" />
+    <input id="password" data-testid="username-password" type="password" [formField]="loginForm.password" />
 
     @if (loginForm.password().touched() && loginForm.password().invalid()) {
       @for (err of loginForm.password().errors(); track err.message) {

@@ -11,7 +11,7 @@
       <p class="error-msg" role="alert">{{createError()}}</p>
     }
     <label for="loc">Location</label>
-    <input type="text" id="loc" [formField]="locationForm.locationCode" placeholder="Location ex. A-1-012" />
+    <input type="text" data-testid="locationCode" id="loc" [formField]="locationForm.locationCode" placeholder="Location ex. A-1-012" />
     @if(locationForm.locationCode().touched() && locationForm.locationCode().invalid()){
       @for (err of locationForm.locationCode().errors(); track err.message){
         <p class="error-msg">{{err.message}}</p>
@@ -52,7 +52,7 @@
             <td>{{location.id}}</td>
             @if(editingId() === location.id){
               <td>
-                <input type="text" [value]="editCode()" (change)="onEditCodeChange($event)" aria-label="Edit location code" />
+                <input data-testid="edit-code-input" type="text" [value]="editCode()" (change)="onEditCodeChange($event)" aria-label="Edit location code" />
               </td>
               <td class="row-actions">
                 <button type="button" (click)="onSaveEdit(location.id)">Save</button>

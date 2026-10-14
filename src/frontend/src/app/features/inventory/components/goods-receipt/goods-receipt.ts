@@ -20,20 +20,20 @@ export class GoodsReceipt {
   private readonly logisticsService = inject(LogisticsService);
 
   // Reactive list of all locations for the dropdown (auto-tracked by Angular)
-  protected readonly locationResource = this.logisticsService.locationResource;
+  readonly locationResource = this.logisticsService.locationResource;
 
   // true tylko gdy lista załadowana i pusta — .value() rzuca wyjątek w stanie error,
   // dlatego nie wolno go wołać bezwarunkowo w template (stąd computed z guardem)
-  protected readonly hasNoLocations = computed(
+  readonly hasNoLocations = computed(
     () => !this.locationResource.isLoading() && !this.locationResource.error()
       && this.locationResource.value()?.length === 0,
   );
 
   // form model for 'goods receipt' (Wareneingang)
-  protected readonly receiptModel = signal<ReceiptFormModel>({ sku: '', loc: '', qty: null });
+  readonly receiptModel = signal<ReceiptFormModel>({ sku: '', loc: '', qty: null });
 
   // form validation
-  protected readonly receiptForm = form(this.receiptModel, f => {
+  readonly receiptForm = form(this.receiptModel, f => {
     required(f.sku, { message: 'SKU is required' });
     required(f.loc, { message: 'Location is required' });
     required(f.qty, { message: 'Quantity is required' });
@@ -48,8 +48,8 @@ export class GoodsReceipt {
   });
 
   // Feedback messages after a submit attempt
-  protected readonly receiveError = signal<string | null>(null);
-  protected readonly receiveMessage = signal<string | null>(null);
+  readonly receiveError = signal<string | null>(null);
+  readonly receiveMessage = signal<string | null>(null);
 
   onSubmit(event: Event): void {
     event.preventDefault();

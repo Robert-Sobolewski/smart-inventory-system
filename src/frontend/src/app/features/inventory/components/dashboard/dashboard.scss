@@ -1,0 +1,129 @@
+// Lager-Dashboard — spójne z designem reszty aplikacji (GitHub-style palette)
+.dashboard-container {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+
+  h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+// ---------- KPI cards ----------
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 0 0 2rem;
+}
+
+.kpi-card {
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  background: #f6f8fa;
+
+  dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #57606a;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  dd {
+    margin: 0.25rem 0 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2328;
+  }
+
+  &.kpi-critical {
+    border-color: #c62828;
+    background: #fff5f5;
+
+    dd {
+      color: #c62828;
+    }
+  }
+}
+
+// ---------- Stock table ----------
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #d0d7de;
+    text-align: left;
+  }
+
+  thead th {
+    background: #f6f8fa;
+    font-weight: 600;
+    color: #57606a;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  tr.low-stock td {
+    background: #fff8e6;
+  }
+}
+
+// ---------- Badges ----------
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.badge-warning {
+    background: #fff3cd;
+    color: #8a6d1a;
+    border: 1px solid #e6c964;
+  }
+
+  &.badge-ok {
+    background: #e6f4ea;
+    color: #1b7f3b;
+    border: 1px solid #a8d5b5;
+  }
+}
+
+// ---------- Error box ----------
+.error-box {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: #fff5f5;
+  border: 1px solid #c62828;
+  color: #c62828;
+
+  button {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+    background: #fff;
+    cursor: pointer;
+
+    &:hover {
+      background: #f6f8fa;
+    }
+  }
+}

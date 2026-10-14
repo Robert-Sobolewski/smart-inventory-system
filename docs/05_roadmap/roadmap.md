@@ -18,11 +18,11 @@ Following the latest market analysis for 2026, the project has migrated to a mod
 - [x] Initialize Angular project with strict TypeScript settings.
 - [x] Implement a secure Login Page integrated with the JWT Backend (JWT interceptor + route guard on `/products`).
 - [x] Product list with signal-based "add product" form (`features/inventory`), served via dev proxy (`proxy.conf.json`).
-- [ ] Create a Dashboard for real-time stock overview using Signals.
-- [ ] Build "Goods Receipt" and "Issue" forms with Signal-based validation (backend endpoints `/api/logistics/receive` / `/issue` already exist).
+- [x] Create a Dashboard for real-time stock overview using Signals. Implemented in `features/inventory/components/dashboard/`: KPI cards (products, total units, locations, low-stock warnings), sorted stock table with low-stock-first ordering and OK/Low Stock badges, served by `/api/dashboard/*` (read-only, WORKER/MANAGER/ADMIN). Verified end-to-end 2026-10-06.
+- [x] Build "Goods Receipt" and "Issue" forms with Signal-based validation (backend endpoints `/api/logistics/receive` / `/issue` already exist). Implemented in `features/inventory/components/goods-receipt/` and `goods-issue/`: signal-based forms, live stock preview (`GET /stock/{sku}`), out-of-stock alert disabling submit, MANAGER-only routes.
 
 ### 2.3 Open Decisions
-- [ ] Frontend test strategy: component tests for login / product-list / status are missing; decide between Karma/Jasmine (default) and Vitest.
+- [x] Frontend test strategy: **Vitest** (Angular 22 default unit-test builder) with `@vitest/coverage-v8` coverage — configured in `src/frontend/vitest.config.ts` + `test-setup.ts`. Component tests for login / product-list / status exist; service + component example specs added under `*.examples.spec.ts` (see `docs/04_quality_assurance/testing_guide.md`).
 
 ## 3. Phase 5: Infrastructure & DevOps (The Cloud Path)
 To ensure the application is deployable in corporate environments, we will implement modern infrastructure tools.

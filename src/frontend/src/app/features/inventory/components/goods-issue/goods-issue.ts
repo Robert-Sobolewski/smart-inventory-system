@@ -19,11 +19,11 @@ export class GoodsIssue {
   private readonly logisticsService = inject(LogisticsService);
 
   // form model for 'goods issue' (Warenausgang, FIFO)
-  protected readonly issueModel = signal<IssueFormModel>({ sku: '', qty: null });
+  readonly issueModel = signal<IssueFormModel>({ sku: '', qty: null });
 
   // form validation — strukturalna (required + integer >= 1).
   // Walidacja "qty <= stan" jest osobnym computed (stockAvailable), bo zależy od stanu z API.
-  protected readonly issueForm = form(this.issueModel, f => {
+  readonly issueForm = form(this.issueModel, f => {
     required(f.sku, { message: 'SKU is required' });
     required(f.qty, { message: 'Quantity is required' });
     validate(f.qty, ctx => {
@@ -36,24 +36,24 @@ export class GoodsIssue {
   });
 
   // Feedback messages after a submit attempt
-  protected readonly issueError = signal<string | null>(null);
-  protected readonly issueMessage = signal<string | null>(null);
+  readonly issueError = signal<string | null>(null);
+  readonly issueMessage = signal<string | null>(null);
 
   // --- Stock preview (alert braku towaru) -------------------------------------
   // Przy zmianie SKU pobieramy aktualny stan z GET /stock/{sku} (debounce 400 ms).
-  protected readonly stockLoading = signal(false);
-  protected readonly stockAvailable = signal<number | null>(null);
-  protected readonly stockError = signal<string | null>(null);
+  readonly stockLoading = signal(false);
+  readonly stockAvailable = signal<number | null>(null);
+  readonly stockError = signal<string | null>(null);
 
   // qty > dostępny stan -> alert + submit zablokowany (decyzja v1: all-or-nothing)
-  protected readonly overStock = computed(() => {
+  readonly overStock = computed(() => {
     const q = this.issueModel().qty;
     const s = this.stockAvailable();
     return q !== null && s !== null && !this.stockError() && q > s;
   });
 
   // Submit tylko gdy: formularz ważny + stan znany (nie ładuje się, nie ma błędu) + qty <= stan
-  protected readonly canSubmit = computed(() => {
+  readonly canSubmit = computed(() => {
     return this.issueForm().valid()
       && !this.stockLoading()
       && !this.stockError()
