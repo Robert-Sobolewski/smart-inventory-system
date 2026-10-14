@@ -1,59 +1,54 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+Angular 22 SPA for the Smart Inventory System. Generated with [Angular CLI](https://github.com/angular/angular-cli) v22.1.8, package manager: **Yarn 4**.
+
+## Prerequisites
+
+- Node.js 20+ (LTS), Yarn 4 (`corepack enable`)
+- Backend (Spring Boot) running on `http://127.0.0.1:8888` — the dev server proxies `/api/*` to it (see `proxy.conf.json`)
 
 ## Development server
 
-To start a local development server, run:
-
 ```bash
-ng serve
+yarn start        # = ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4200/`. The app hot-reloads on every source change. API calls (`/api/...`) are proxied to the backend at `127.0.0.1:8888` — **start the backend first**, otherwise requests will fail with 504/ECONNREFUSED.
 
 ## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
 ```bash
-ng generate component component-name
+yarn ng generate component feature-name/component-name
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
+For all available schematics (`component`, `directive`, `pipe`, ...): `yarn ng generate --help`.
 
 ## Building
 
-To build the project run:
-
 ```bash
-ng build
+yarn build        # = ng build (production, optimized) -> dist/frontend/browser/
+yarn watch        # development build, rebuilds on change
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The production build is what you deploy; the dev server (`yarn start`) is for local work.
 
 ## Running unit tests
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+This project uses **[Vitest](https://vitest.dev/)** as its test runner (jsdom environment, Angular setup in `src/test-setup.ts`, config in `vitest.config.ts`). Use the scripts from `package.json`:
 
-```bash
-ng test
-```
+| Command | What it does |
+|---|---|
+| `yarn test:run` | Runs **all tests once** and exits — use this for CI / final verification |
+| `yarn test:vitest` | **Watch mode** — re-runs affected tests on every file change, use while writing code |
+| `yarn test:coverage` | Tests + coverage report (HTML in `coverage/`) |
+
+> **Note about `ng test`:** it also works and runs the same specs through Angular's unit-test builder (`@angular/build:unit-test`, with full type checking). However, that builder uses its own zone.js environment and does **not** load `src/test-setup.ts`, so helpers like `fakeAsync()` can fail there. For this project, prefer the Vitest commands above — they are the source of truth for "tests pass".
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+No e2e framework is configured yet (Angular CLI ships without one). If needed later: [Playwright](https://playwright.dev/) or [Cypress](https://www.cypress.io/).
 
 ## Additional Resources
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli)
+- [Vitest documentation](https://vitest.dev/)
