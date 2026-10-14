@@ -1,6 +1,49 @@
-# STATUS — smart-inventory-system (stan na 2026-10-06)
+# STATUS — smart-inventory-system (stan na 2026-10-14)
 
-## 🎯 Bieżąca faza: Dashboard — ✅ ZAKOŃCZONE I ZWERYFIKOWANE (commit `84a6efa`)
+## 🎯 Bieżąca faza: Testy frontendu + README/dokumentacja — ✅ ZAKOŃCZONE I ZWERYFIKOWANE (commits `98b455b`…`eea5077`)
+Rozbudowa testów frontendu do pełnego pokrycia serwisów i komponentów + kompletacja dokumentacji projektowej.
+
+### Co zrobione i zweryfikowane
+**Testy frontendu (Vitest = source of truth):**
+- `dashboard-service.spec.ts` napisany od zera (7 testów): semantyka httpResource w Angular 22 — auto-load przez effect, `.reload()`, error jako plain object. House style zgodny z `inventory-service.spec.ts` (flat its, imperative English names, drain w afterEach przez `httpMock.match(url)` + flush).
+- Rozbudowa istniejących speców: auth-service, inventory-service, add-location-service (HttpTestingController) oraz login, add-location, dashboard, goods-issue, goods-receipt, product-list (DOM-level rendering tests — renderowanie tabeli/formularzy/stanów błędów).
+- Hooki testowe: `data-testid` w `login.html` i `add-location.html`; sygnały template-bound z `protected readonly` → `readonly` w 4 komponentach.
+- **Stan: 14 plików / 112 testów — wszystkie zielone** (`vitest run`, 2026-10-14).
+
+**Dokumentacja:**
+- Root `README.md` (był pusty) — zachęcający opis dla rekrutera: pitch, tabela stacku, "Engineering highlights" z linkami do konkretnych plików, diagram Mermaid, mapa repozytorium, quick start, roadmap.
+- `src/backend/README.md` stworzony — pełna tabela endpointów + role (zweryfikowane grepem w kontrolerach), kontrakt błędów, komendy testowe.
+- `TESTING_PROGRESS.md` usunięty (nieaktualny) → esencja przeniesiona do sekcji 4 `docs/04_quality_assurance/testing_report.md` (frontend: Vitest, coverage, uwagi o `ng test`).
+
+**Commits (gałąź dev):**
+- `98b455b` test(frontend): expose template-bound signals + data-testid hooks
+- `dcf72aa` test(frontend): expand service specs with HttpTestingController coverage
+- `0fc588b` test(frontend): add DOM-level rendering tests to component specs
+- `33d7d87` test(frontend): add DashboardService spec for httpResource semantics
+- `136cf86` chore(tests): remove logistics example spec + stale app snapshot (plik examples usunięty świadomie — był inspiracją, nie częścią projektu)
+- `eea5077` docs: root + backend README; frontend testing status → QA report
+
+### ⚠️ PITFALLS (Angular 22 — zweryfikowane empirycznie w tej fazie)
+- `provideHttpClientTesting` importować z **`@angular/common/http/testing`** (subpath), NIE z `/http`.
+- httpResource: **nie ma metody `load()`**, tylko `reload(): boolean`; initial fetch jest automatyczny przez effect w mikrozadaniu po konstrukcji; `value()/isLoading()/error()` to sygnały (callable), `hasValue()` to funkcja.
+- Po konstrukcji serwisu / po `reload()`: `await settle()` (tick makro-zadania) PRZED `expectOne()` — request leci w mikrozadaniu, nie synchronicznie.
+- Serwis z wieloma resource'ami auto-loaduje WSZYSTKIE przy konstrukcji → afterEach musi drenażować każdy endpoint (`httpMock.match(url)` + flush), inaczej "Cannot configure the test module when already instantiated".
+- `HttpErrorResponse` w Angular 22 = **interface (plain object)**, nie klasa Error → asercja na `err?.status`, NIE `toBeInstanceOf(Error)`.
+- `HttpTestingController.getRequests()` zastąpione przez `match(matcher): TestRequest[]` (usuwa requesty z listy open; `flush()` działa i tak bezpośrednio na observerze).
+
+### ⏭️ Następne kroki
+1. Przenieść logikę biznesową Location z controllera do `LocationService` (standard IHK) — odłożone od 2026-10-06.
+2. Faza 5: Docker + CI/CD (GitHub Actions). Potem Phase 6: Multi-Warehouse / Audit Logging / Swagger.
+3. Opcjonalnie: e2e (Playwright/Cypress) — frontend nie ma frameworka e2e.
+
+### Środowisko / komendy robocze
+- `cd src/frontend && node ./node_modules/vitest/vitest.mjs run` — pełny zestaw testów.
+- yarn ma bug dróg MSYS → narzędzia uruchamiać przez `node ./node_modules/...`.
+- `ng test --watch=false` działa, ale goods-issue.spec FAIL na fakeAsync (brak zone.js/testing) — znane i zaakceptowane; Vitest jest source of truth.
+
+---
+
+## ✅ Poprzednia faza: Dashboard — ✅ ZAKOŃCZONE I ZWERYFIKOWANE (commit `84a6efa`)
 Read-only dashboard z KPI i tabelą stanów. Działa end-to-end (zweryfikowane w przeglądarce 2026-10-06).
 
 ### Co zrobione i zweryfikowane
