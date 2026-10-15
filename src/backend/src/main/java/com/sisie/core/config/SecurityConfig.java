@@ -51,7 +51,7 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 
 		// erlaube nur bestimmte Domains
-		config.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+		config.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:8081"));
 
 		// erlaubte Methoden
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
