@@ -13,6 +13,7 @@ Spring Boot 4 backend · Angular 22 frontend (signals) · JWT security · FIFO s
 | **Frontend** | Angular 22 (signals, `httpResource`) · strict TypeScript · Yarn 4 |
 | **Security** | JWT authentication · role-based access (`WORKER` / `MANAGER` / `ADMIN`) via method-level `@PreAuthorize` |
 | **Testing** | Frontend: **116 unit tests green** (Vitest + jsdom) · Backend: JUnit 5 + Mockito, JaCoCo ~97%, Pitest mutation testing |
+| **Deployment** | Docker multi-stage builds · docker-compose stack (Nginx reverse proxy + Spring Boot) |
 | **Documentation** | Full SDLC trail in [`docs/`](#documentation): analysis → design → implementation → QA → roadmap |
 
 ## What it does
@@ -58,7 +59,16 @@ flowchart LR
 
 ## Quick start
 
-**Backend** — Java 21, Maven:
+**Docker (full stack, one command):**
+
+```bash
+docker compose up -d --build
+# → http://localhost:8081  (Nginx serves the Angular SPA and proxies /api/* to Spring Boot)
+```
+
+Demo accounts are seeded on first start: `admin`/`Admin123!`, `manager`/`Manager123!`, `worker`/`Worker123!`. The SQLite database persists in `./data/`.
+
+**Backend (dev mode)** — Java 21, Maven:
 
 ```bash
 cd src/backend
@@ -87,4 +97,4 @@ How to write new tests: [testing guide](docs/04_quality_assurance/testing_guide.
 
 ## Roadmap
 
-Docker + GitHub Actions CI/CD → multi-warehouse support, audit logging, OpenAPI/Swagger — see the [roadmap](docs/05_roadmap/roadmap.md).
+**Done:** Docker (multi-stage builds, compose stack) · **In progress:** GitHub Actions CI/CD (build → tests/JaCoCo → Trivy security scan → GHCR image push) · **Next:** multi-warehouse support, audit logging, OpenAPI/Swagger — see the [roadmap](docs/05_roadmap/roadmap.md).
