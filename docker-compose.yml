@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    image: sisie-backend:latest        # ← o 2 spacje mniej niż wyżej
+    container_name: sisie-backend
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data/sisie_database.db:/app/sisie_database.db
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    image: sisie-frontend:latest       # ← to samo tu
+    container_name: sisie-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
