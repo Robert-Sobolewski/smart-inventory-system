@@ -36,10 +36,10 @@ jobs:
         working-directory: src/backend
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 21 (Temurin)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -51,14 +51,14 @@ jobs:
 
       - name: Upload JaCoCo coverage report
         if: always() # keep the artifact even when tests fail
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: jacoco-report
           path: src/backend/target/site/jacoco/
 
       - name: Upload backend JAR (for security scan)
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sisie-backend-jar
           path: src/backend/target/*.jar
@@ -79,7 +79,7 @@ jobs:
     needs: build-test # only scan code that already compiled and passed tests
     steps:
       - name: Download backend JAR from build job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: sisie-backend-jar
           path: src/backend/target/
@@ -106,7 +106,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
