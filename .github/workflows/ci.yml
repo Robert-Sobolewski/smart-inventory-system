@@ -125,8 +125,8 @@ jobs:
           file: src/backend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/sisie-backend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sisie-backend:latest
+            ghcr.io/${{ string.lowercase( github.repository_owner) }}/sisie-backend:${{ github.sha }}
+            ghcr.io/${{ string.lowercase( github.repository_owner) }}/sisie-backend:latest
 
       - name: Build & push frontend image
         uses: docker/build-push-action@v6
@@ -135,5 +135,5 @@ jobs:
           file: src/frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/sisie-frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sisie-frontend:latest
+            ghcr.io/${{ string.lowercase(github.repository_owner) }}/sisie-frontend:${{ github.sha }}
+            ghcr.io/${{ string.lowercase(github.repository_owner) }}/sisie-frontend:latest
