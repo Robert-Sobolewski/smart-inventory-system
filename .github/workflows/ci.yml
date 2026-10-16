@@ -48,6 +48,11 @@ jobs:
       - name: Build + run tests + JaCoCo report
         run: mvn -B verify
         # 'verify' = full lifecycle: compile -> test (surefire) -> jacoco:report
+      
+      - name: Repository name must be lowercase
+        run: |
+          echo "REPO_OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        
 
       - name: Upload JaCoCo coverage report
         if: always() # keep the artifact even when tests fail
@@ -125,8 +130,8 @@ jobs:
           file: src/backend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ string.lowercase( github.repository_owner) }}/sisie-backend:${{ github.sha }}
-            ghcr.io/${{ string.lowercase( github.repository_owner) }}/sisie-backend:latest
+            ghcr.io/${{ REPO_OWNER_LOWERCASE }}/sisie-backend:${{ github.sha }}
+            ghcr.io/${{ REPO_OWNER_LOWERCASE }}/sisie-backend:latest
 
       - name: Build & push frontend image
         uses: docker/build-push-action@v6
@@ -135,5 +140,5 @@ jobs:
           file: src/frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ string.lowercase(github.repository_owner) }}/sisie-frontend:${{ github.sha }}
-            ghcr.io/${{ string.lowercase(github.repository_owner) }}/sisie-frontend:latest
+            ghcr.io/${{ REPO_OWNER_LOWERCASE}}/sisie-frontend:${{ github.sha }}
+            ghcr.io/${{ REPO_OWNER_LOWERCASE}}/sisie-frontend:latest
