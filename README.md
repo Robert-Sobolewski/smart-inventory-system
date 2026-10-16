@@ -3,6 +3,8 @@
 **Full-stack warehouse management application, built and documented end-to-end to industrial standards.**
 Spring Boot 4 backend · Angular 22 frontend (signals) · JWT security · FIFO stock logic · a complete SDLC documentation trail.
 
+[![CI](https://github.com/Robert-Sobolewski/smart-inventory-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Robert-Sobolewski/smart-inventory-system/actions)
+
 > **For reviewers:** the parts worth looking at first are marked in [Engineering highlights](#engineering-highlights). The full story — requirements, architecture decisions, security model, QA report — lives in [`docs/`](#documentation).
 
 ## At a glance
@@ -97,4 +99,4 @@ How to write new tests: [testing guide](docs/04_quality_assurance/testing_guide.
 
 ## Roadmap
 
-**Done:** Docker (multi-stage builds, compose stack) · **In progress:** GitHub Actions CI/CD (build → tests/JaCoCo → Trivy security scan → GHCR image push) · **Next:** multi-warehouse support, audit logging, OpenAPI/Swagger — see the [roadmap](docs/05_roadmap/roadmap.md).
+**Done:** Docker (multi-stage builds, compose stack) · GitHub Actions CI/CD (build → tests/JaCoCo → Trivy security scan → GHCR image push) · **Next:** multi-warehouse support, audit logging, OpenAPI/Swagger — see the [roadmap](docs/05_roadmap/roadmap.md).
