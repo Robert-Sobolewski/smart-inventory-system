@@ -20,6 +20,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'suppliers',
+    canActivate: [authGuard], // <- guard: bez tokena redirect na /login
+    loadComponent: () =>
+      import('./features/inventory/components/supplier-list/supplier-list').then(
+        (m) => m.SupplierList,
+      ),
+  },
+  {
     path: 'locations',
     canActivate: [authGuard],
     loadComponent: () =>

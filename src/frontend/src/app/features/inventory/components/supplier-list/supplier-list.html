@@ -1,0 +1,93 @@
+<section class="suppliers">
+  <h2>Suppliers</h2>
+  <!-- create supplier form -->
+
+  <form (submit)="onSubmit($event)">
+    <h3>Create Supplier</h3>
+    @if(createMessage()){
+      <p class="success-msg" role="status">{{createMessage()}}</p>
+    }
+    @if(createError()){
+      <p class="error-msg" role="alert">{{createError()}}</p>
+    }
+    <label for="supplier-name">Name</label>
+    <input type="text" data-testid="supplierName" id="supplier-name" [formField]="supplierForm.name" placeholder="Supplier name ex. ACME GmbH" />
+    @if(supplierForm.name().touched() && supplierForm.name().invalid()){
+      @for (err of supplierForm.name().errors(); track err.message){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <label for="supplier-email">Email</label>
+    <input type="email" data-testid="supplierEmail" id="supplier-email" [formField]="supplierForm.email" placeholder="contact@acme.de" />
+    @if(supplierForm.email().touched() && supplierForm.email().invalid()){
+      @for (err of supplierForm.email().errors(); track err.message){
+        <p class="error-msg">{{err.message}}</p>
+      }
+    }
+
+    <label for="supplier-address">Address</label>
+    <input type="text" data-testid="supplierAddress" id="supplier-address" [formField]="supplierForm.address" placeholder="Street, city (optional)" />
+
+    <button type="submit" [disabled]="supplierForm().invalid()">Create Supplier</button>
+  </form>
+
+  <!-- supplier list -->
+  @if(supplierResource.isLoading()){
+    <div class="loading-state" role="status">
+      <p>Loading suppliers...</p>
+    </div>
+  } @else if(supplierResource.error()){
+    <div class="error-state" role="alert">
+      <p>Could not load suppliers.</p>
+      <button (click)="supplierResource.reload()">Try again</button>
+    </div>
+  } @else {
+    @if(updateMessage()){
+      <p class="success-msg" role="status">{{updateMessage()}}</p>
+    }
+    @if(updateError()){
+      <p class="error-msg" role="alert">{{updateError()}}</p>
+    }
+    <table class="suppliers-table" aria-label="All suppliers">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Address</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(supplier of supplierResource.value(); track supplier.id){
+          <tr>
+            <td>{{supplier.id}}</td>
+            @if(editingId() === supplier.id){
+              <td><input data-testid="edit-name-input" type="text" [value]="editName()" (change)="onEditNameChange($event)" aria-label="Edit supplier name" /></td>
+              <td><input data-testid="edit-email-input" type="email" [value]="editEmail()" (change)="onEditEmailChange($event)" aria-label="Edit supplier email" /></td>
+              <td><input data-testid="edit-address-input" type="text" [value]="editAddress()" (change)="onEditAddressChange($event)" aria-label="Edit supplier address" /></td>
+              <td class="row-actions">
+                <button type="button" (click)="onSaveEdit(supplier.id!)">Save</button>
+                <button type="button" class="cancel-btn" (click)="onCancelEdit()">Cancel</button>
+              </td>
+            } @else {
+              <td>{{supplier.name}}</td>
+              <td>{{supplier.email ?? '—'}}</td>
+              <td>{{supplier.address ?? '—'}}</td>
+              <td class="row-actions">
+                <button type="button" (click)="onEdit(supplier)">Edit</button>
+                <button type="button" class="delete-btn" (click)="onDeleteSupplier(supplier)">Delete</button>
+              </td>
+            }
+          </tr>
+        } @empty{
+          <tr>
+            <td colspan="5" class="empty-msg">No suppliers yet.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</section>
