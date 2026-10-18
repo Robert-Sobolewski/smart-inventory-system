@@ -2,10 +2,17 @@ package com.sisie.core.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 class JwtTokenProviderTest {
 
@@ -74,6 +81,27 @@ class JwtTokenProviderTest {
 
 		// Act & Assert
 		assertFalse(jwtTokenProvider.validateToken(token));
+	}
+	
+	@Test
+	@DisplayName("Should return correct role from valid JWT")
+	void getRoleFromJWT_Success() {
+		
+		// Setup token with role MANAGER
+		SecretKey testkey= Keys.hmacShaKeyFor(secret.getBytes());
+		String token = Jwts.builder()
+				.setSubject("user123")
+				.claim("role", "ROLE_MANAGER")
+				.setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis()+3600000))
+				.signWith(testkey)
+				.compact();
+		
+		//act
+		String role = jwtTokenProvider.getRoleFromJWT(token);
+		
+		// assert
+		assertEquals("ROLE_MANAGER", role,"Role in token should match ");
 	}
 
 }
