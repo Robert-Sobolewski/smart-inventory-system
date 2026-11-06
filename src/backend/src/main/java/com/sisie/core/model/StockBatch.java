@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Repraesentiert eine spezifische Charge von Produkten an einem Lagerplatz.
- * Dies ist die zentralle Klasse fuer die FIFO-Logik (first-in-first-out).
+ * Represents a specific batch of products at a storage location.
+ * This is the central class for the FIFO logic (first-in-first-out).
  */
 @Entity
 @Table(name="stock_batches")
@@ -35,33 +35,33 @@ public class StockBatch {
 	private Long id;
 	
 	/**
-	 * Verknuepfung zum Produkt. Viele Batches koennen dasselbe Produkt enthalten.
+	 * Link to the product. Many batches can contain the same product.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="product_id", nullable = false)
 	private Product product;
 	
 	/**
-	 * Verknuepfung zum Lagerplatz. Viele Batches koennen an einem Ort liegen.
+	 * Link to the storage location. Many batches can be at one location.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="location_id", nullable = false)
 	private Location location;
 	
 	/**
-	 * Die aktuelle Menge in dieser spezifischen Charge.
+	 * The current quantity in this specific batch.
 	 */
 	@Column(nullable = false)
 	private Integer quantity;
 	
 	/**
-	 * Das Datum des Wareneingangs. Essentiel fuer FIFO.
+	 * The goods-receipt date. Essential for FIFO.
 	 */
 	@Column(nullable = false)
 	private LocalDate receivedDate;
 	
 	/**
-	 * Optionales Ablaufdatum oder Garantieende.
+	 * Optional expiry or warranty-end date.
 	 */
 	private LocalDate expiryDate;
 	

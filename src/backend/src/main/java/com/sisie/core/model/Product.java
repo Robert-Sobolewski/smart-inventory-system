@@ -5,10 +5,10 @@ import lombok.*;
 
 
 /**
- * Repraesentiert ein physisches Produkt im Lagerbestand der Industrieelektronik.
- * Diese Klasse dent als Mapping fur die Datenbanktabelle 'products'.
+ * Represents a physical product in the industrial electronics stock.
+ * This class serves as the mapping for the database table 'products'.
  * 
- * <p>Ein Produkt ist die grundlegende Einheit des Systems und eindeutige SKU identifiziert.</p>
+ * <p>A product is the basic unit of the system and is identified by a unique SKU.</p>
  * 
  * @author rrr
  * @version 0.1
@@ -24,8 +24,8 @@ import lombok.*;
 public class Product {
 
 	/**
-	 * Eindeutige interne Id des Produkts (Primaerschluessel).
-	 * Wird automatisch durch die Datenbank generiert.
+	 * Unique internal ID of the product (primary key).
+	 * Generated automatically by the database.
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,32 +33,32 @@ public class Product {
 	
 	/**
 	 * Stock Keeping Unit (SKU).
-	 * Eine weltweit eindeutige Artikelnummer zur Identifikation des Produkts.
-	 * Beispiel: RES-10K-OHM-001
+	 * A globally unique article number for identifying the product.
+	 * Example: RES-10K-OHM-001
 	 */
 	@Column(unique=true, nullable=false)
 	private String sku;
 	
 	/**
-	 * Der menschenlesbare Name des Produkts (z.B. "Widerstand 10k Ohm").
+	 * Human-readable name of the product (e.g. "Resistor 10k Ohm").
 	 */
 	@Column(nullable=false)
 	private String name;
 	
 	/**
-	 * Kategorie zur Gruppierung von Produkten (z.B. "Passivbauelemente", "Sensoren").
+	 * Category for grouping products (e.g. "Passive Components", "Sensors").
 	 */
 	private String category;
 	
 	/**
-	 * Detaillierte technische Beschreibung des Produkts.
+	 * Detailed technical description of the product.
 	 */
 	private String description;
 	
 	/**
-	 * Der Schwellenwert fur den Lagerbestand.
-	 * Wenn die Menge unter diesen Wert faellt, wird ein Low-Stock Alert ausgeloest.
-	 * Standardwert ist 10 Stueck.
+	 * Threshold for the stock level.
+	 * If the quantity falls below this value, a low-stock alert is raised.
+	 * The default value is 10 units.
 	 */
 	@Column(name = "min_stock_level")
 	private Integer minStockLevel =10;

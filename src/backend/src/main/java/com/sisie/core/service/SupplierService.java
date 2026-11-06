@@ -10,7 +10,7 @@ import com.sisie.core.model.Supplier;
 import com.sisie.core.repository.SupplierRepository;
 
 /**
- * Serwis do zarządzania dostawcami (Supplier).
+ * Service for managing suppliers.
  */
 @Service
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class SupplierService {
     private final SupplierRepository repository;
 
     /**
-     * Zwraca wszystkich dostawców.
+     * Returns all suppliers.
      */
     @Transactional(readOnly = true)
     public List<Supplier> getAllSuppliers() {
@@ -27,36 +27,36 @@ public class SupplierService {
     }
 
     /**
-     * Zwraca dostawcę po identyfikatorze.
+     * Returns a supplier by its identifier.
      *
-     * @throws EntityNotFoundException gdy dostawca o podanym ID nie istnieje
+     * @throws EntityNotFoundException if no supplier exists with the given ID
      */
     @Transactional(readOnly = true)
     public Supplier findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Dostawca z ID %d nie został znaleziony".formatted(id)));
+                        "Supplier with ID %d not found".formatted(id)));
     }
 
     /**
-     * Tworzy nowego dostawcę.
+     * Creates a new supplier.
      *
-     * @throws IllegalStateException gdy dostawca z podanym adresem e-mail już istnieje
+     * @throws IllegalStateException if a supplier with the given email address already exists
      */
     @Transactional
     public Supplier create(Supplier supplier) {
         if (repository.findByEmail(supplier.getEmail()).isPresent()) {
             throw new IllegalStateException(
-                    "Dostawca z adresem e-mail %s już istnieje".formatted(supplier.getEmail()));
+                    "A supplier with email address %s already exists".formatted(supplier.getEmail()));
         }
         return repository.save(supplier);
     }
 
     /**
-     * Aktualizuje dane dostawcy (nazwa, e-mail, adres).
+     * Updates a supplier's data (name, email, address).
      *
-     * @throws EntityNotFoundException gdy dostawca o podanym ID nie istnieje
-     * @throws IllegalStateException   gdy nowy adres e-mail jest już zajęty przez innego dostawcę
+     * @throws EntityNotFoundException if no supplier exists with the given ID
+     * @throws IllegalStateException   if the new email address is already used by another supplier
      */
     @Transactional
     public Supplier update(Long id, Supplier updated) {
@@ -65,7 +65,7 @@ public class SupplierService {
         if (!newEmail.equals(existing.getEmail())
                 && repository.findByEmail(newEmail).isPresent()) {
             throw new IllegalStateException(
-                    "Adres e-mail %s jest już zajęty przez innego dostawcę".formatted(newEmail));
+                    "Email address %s is already used by another supplier".formatted(newEmail));
         }
         existing.setName(updated.getName());
         existing.setAddress(updated.getAddress());
@@ -74,13 +74,13 @@ public class SupplierService {
     }
 
     /**
-     * Usuwa dostawcę po identyfikatorze.
+     * Deletes a supplier by its identifier.
      *
-     * @throws EntityNotFoundException gdy dostawca o podanym ID nie istnieje
+     * @throws EntityNotFoundException if no supplier exists with the given ID
      */
     @Transactional
     public void delete(Long id) {
-        findById(id); // rzuca wyjątek, jeśli dostawca nie istnieje
+        findById(id); // throws if the supplier does not exist
         repository.deleteById(id);
     }
 }

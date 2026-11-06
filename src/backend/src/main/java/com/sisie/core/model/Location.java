@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Repraesentiert einen physischen Lagerplatz im Warehouse.
- * Beispiel: "A-01-12" (Regal A, Ebene 1, Fach 12)
+ * Represents a physical storage location in the warehouse.
+ * Example: "A-01-12" (shelf A, level 1, slot 12)
  */
 @Entity
 @Table(name="locations")
@@ -30,7 +30,7 @@ public class Location {
 	private Long id;
 	
 	/**
-	 * Eindeutiger Code des Lagerplatzes.
+	 * Unique code of the storage location.
 	 */
 	@Column(unique = true, nullable = false)
 	private String locationCode;

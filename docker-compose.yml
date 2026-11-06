@@ -3,7 +3,7 @@ services:
     build:
       context: ./src/backend
       dockerfile: Dockerfile
-    image: sisie-backend:latest        # ← o 2 spacje mniej niż wyżej
+    image: sisie-backend:latest
     container_name: sisie-backend
     ports:
       - "8888:8888"
@@ -14,7 +14,7 @@ services:
     build:
       context: ./src/frontend
       dockerfile: Dockerfile
-    image: sisie-frontend:latest       # ← to samo tu
+    image: sisie-frontend:latest
     container_name: sisie-frontend
     ports:
       - "8081:80"

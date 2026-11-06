@@ -13,11 +13,11 @@ import com.sisie.core.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Dashboard-Kontroller. Liefert read-only Kennzahlen und die
- * Bestandsuebersicht fuer das Frontend-Dashboard.
+ * Dashboard controller. Provides read-only key figures and the
+ * stock overview for the frontend dashboard.
  *
- * <p>Alle Rollen mit Lesezugriff (WORKER, MANAGER, ADMIN) koennen das
- * Dashboard sehen; es werden keine Daten geaendert.</p>
+ * <p>All roles with read access (WORKER, MANAGER, ADMIN) can view the
+ * dashboard; no data is modified.</p>
  */
 @RestController
 @RequestMapping("/api/dashboard")
@@ -27,25 +27,25 @@ public class DashboardController {
 
 	private final DashboardService dashboardService;
 
-	/** Bestandsuebersicht: eine Zeile pro Produkt mit Low-Stock-Markierung. */
+	/** Stock overview: one row per product with low-stock marking. */
 	@GetMapping("/stock-overview")
 	public List<StockSummaryItem> getStockOverview() {
 		return dashboardService.getStockOverview();
 	}
 
-	/** Anzahl der Lagerplaetze im System. */
+	/** Number of storage locations in the system. */
 	@GetMapping("/location-count")
 	public long getLocationCount() {
 		return dashboardService.countLocations();
 	}
 
-	/** Gesamtbestand aller Produkte in Stueck. */
+	/** Total stock of all products (units). */
 	@GetMapping("/total-units")
 	public int getTotalUnits() {
 		return dashboardService.getTotalUnits();
 	}
 
-	/** Anzahl der Produkte unter ihrem Schwellenwert (Low-Stock). */
+	/** Number of products below their threshold (low stock). */
 	@GetMapping("/low-stock-count")
 	public long getLowStockCount() {
 		return dashboardService.countLowStockProducts();

@@ -51,11 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String role = tokenProvider.getRoleFromJWT(token);
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
-			// Wir müssen Spring Security sagen, wer der Nutzer ist.
-			// Hier erstellen wir einen "Authentication"-Objekt für den aktuellen
-			// Request-Kontext.
+			// Tell Spring Security who the current user is.
+			// We create an "Authentication" object for the current request context.
 			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null,
-                            authorities); // In einer vollen Version würden wir hier die Rollen hinzufügen
+                    authorities); // In a full version we would add the roles here
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 

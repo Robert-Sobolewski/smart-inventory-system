@@ -13,8 +13,8 @@ import com.sisie.core.repository.StockBatchRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Service fuer das Lager-Dashboard. Aggregiert Bestandsdaten ueber alle
- * Produkte und Lagerplaetze hinweg (read-only, keine Buchungen).
+ * Service for the stock dashboard. Aggregates stock data across all
+ * products and storage locations (read-only, no bookings).
  */
 @Service
 @RequiredArgsConstructor
@@ -25,8 +25,8 @@ public class DashboardService {
 	private final StockBatchRepository stockBatchRepository;
 
 	/**
-	 * Liefert eine Zeile pro Produkt mit Gesamtbestand und Low-Stock-Markierung.
-	 * Produkte ohne jeglichen Bestand erscheinen mit totalQuantity = 0.
+	 * Returns one row per product with total stock and low-stock marking.
+	 * Products without any stock appear with totalQuantity = 0.
 	 */
 	public List<StockSummaryItem> getStockOverview() {
 		return productRepository.findAll().stream()
@@ -50,19 +50,19 @@ public class DashboardService {
 				.build();
 	}
 
-	/** Anzahl der Lagerplaetze im System. */
+	/** Number of storage locations in the system. */
 	public long countLocations() {
 		return locationRepository.count();
 	}
 
-	/** Gesamtbestand aller Produkte in Stueck. */
+	/** Total stock of all products (units). */
 	public int getTotalUnits() {
 		return getStockOverview().stream()
 				.mapToInt(StockSummaryItem::getTotalQuantity)
 				.sum();
 	}
 
-	/** Anzahl der Produkte unter ihrem Schwellenwert (Low-Stock). */
+	/** Number of products below their threshold (low stock). */
 	public long countLowStockProducts() {
 		return getStockOverview().stream()
 				.filter(StockSummaryItem::isLowStock)

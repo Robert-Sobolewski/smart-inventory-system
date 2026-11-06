@@ -76,24 +76,23 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http
-				// CSRF deaktivieren ( JWT wird benutzt, deshalb braucht man Cookies/ Sessions
-				// nicht)
+				// Disable CSRF (JWT is used, so cookies/sessions are not needed)
 				.csrf(csrf -> csrf.disable())
 
-				// CORS aktivieren mit corsConfigurationSource
+				// Enable CORS with corsConfigurationSource
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-				// Fuegen den Filter vor dem Standard-Username/Password Filter ein.
+				// Insert the JWT filter before the standard username/password filter.
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-				// Die Zugriffsregeln definieren
+				// Define the access rules
 				.authorizeHttpRequests(auth -> auth
-						// Erlaube allen den Zugriff auf die Login-Endpunkte
+						// Allow everyone to access the login endpoints
 						.requestMatchers("/api/auth/**").permitAll()
-						// Alle andere Endpunkte muessen geschuetzt werden
+						// All other endpoints must be protected
 						.anyRequest().authenticated())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Keine
-				// Keine Sessions auf dem Server.
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No
+				// no server-side sessions.
 				);
 
 		return http.build();

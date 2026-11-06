@@ -197,7 +197,7 @@ class LocationControllerTest {
 
 		mockMvc.perform(post("/api/locations/create").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(mockLocationRequest))).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Lagerplatz A-1-12 existiert bereits!"));
+				.andExpect(jsonPath("$.message").value("Storage location A-1-12 already exists!"));
 
 		verify(locationRepository, times(1)).findByLocationCode(anyString());
 
@@ -288,7 +288,7 @@ class LocationControllerTest {
 
 		mockMvc.perform(put("/api/locations/" + id).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(mockLocationRequest))).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Lagerplatz mit ID 99 existiert nicht!"));
+				.andExpect(jsonPath("$.message").value("Storage location with ID 99 does not exist!"));
 
 		verify(locationRepository, times(1)).findById(id);
 	}
@@ -309,7 +309,7 @@ class LocationControllerTest {
 
 		mockMvc.perform(put("/api/locations/" + id).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(mockLocationRequest))).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Lagerplatz B-2-05 existiert bereits!"));
+				.andExpect(jsonPath("$.message").value("Storage location B-2-05 already exists!"));
 
 		verify(locationRepository, never()).save(any());
 	}
@@ -382,7 +382,7 @@ class LocationControllerTest {
 		when(locationRepository.findById(id)).thenReturn(Optional.empty());
 
 		mockMvc.perform(delete("/api/locations/" + id)).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Lagerplatz mit ID 99 existiert nicht!"));
+				.andExpect(jsonPath("$.message").value("Storage location with ID 99 does not exist!"));
 
 		verifyNoInteractions(stockBatchRepository);
 	}
@@ -401,7 +401,7 @@ class LocationControllerTest {
 
 		mockMvc.perform(delete("/api/locations/" + id)).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.message")
-						.value("Lagerplatz ID 1 kann nicht geloescht werden, da dort noch 2 StockBatch(es) liegen!"));
+						.value("Storage location ID 1 cannot be deleted because there are still 2 StockBatch(es) at it!"));
 
 		verify(locationRepository, never()).delete(any());
 	}

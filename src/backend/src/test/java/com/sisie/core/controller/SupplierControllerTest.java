@@ -26,8 +26,8 @@ import com.sisie.core.model.Supplier;
 import com.sisie.core.security.JwtTokenProvider;
 
 /**
- * Testy warstwy HTTP SupplierController (bez kontekstu calej aplikacji,
- * serwis zamieniony na Mocka).
+ * HTTP-layer tests for SupplierController (no full application context;
+ * the service is replaced with a mock).
  */
 @WebMvcTest(SupplierController.class)
 @AutoConfigureMockMvc(addFilters = true)
@@ -38,9 +38,9 @@ class SupplierControllerTest {
     private MockMvc mockMvc;
 
     /**
-     * JwtAuthenticationFilter (właczony przez addFilters=true) wymaga tego beanu,
-     * ale w slajsie @WebMvcTest nie jest skanowany - wiec mockujemy go jak w
-     * innych testach kontrolerow.
+     * JwtAuthenticationFilter (enabled via addFilters=true) requires this bean,
+     * but it is not scanned in a @WebMvcTest slice - so we mock it like in the
+     * other controller tests.
      */
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
@@ -54,7 +54,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_WORKER")
-    @DisplayName("Sollte alle Lieferanten als JSON-Liste zurueckgeben")
+    @DisplayName("Should return all suppliers as a JSON list")
     void getAll_ShouldReturnSupplierList() throws Exception {
         // 1. SETUP
         Supplier a = com.sisie.core.model.Supplier.builder()
@@ -77,7 +77,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte bestehenden Lieferanten nach ID als JSON zurueckgeben")
+    @DisplayName("Should return an existing supplier by ID as JSON")
     void getById_ShouldReturnExistingSupplier() throws Exception {
         // 1. SETUP
         Supplier existing = com.sisie.core.model.Supplier.builder()
@@ -96,18 +96,18 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte 400 liefern, wenn Lieferant nicht existiert (EntityNotFoundException)")
+    @DisplayName("Should return 400 when the supplier does not exist (EntityNotFoundException)")
     void getById_ShouldReturnBadRequestWhenMissing() throws Exception {
         // 1. SETUP
         when(supplierService.findById(eq(99L)))
                 .thenThrow(new EntityNotFoundException(
-                        "Dostawca z ID 99 nie został znaleziony"));
+                        "Supplier with ID 99 not found"));
 
         // 2. ACT & ASSERT
         mockMvc.perform(get("/api/suppliers/{id}", 99L))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Dostawca z ID 99 nie został znaleziony"));
+                        .value("Supplier with ID 99 not found"));
 
         verify(supplierService, times(1)).findById(eq(99L));
     }
@@ -116,7 +116,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte neuen Lieferanten anlegen und Bestätigung zurückgeben")
+    @DisplayName("Should create a new supplier and return a confirmation")
     void create_ShouldCreateNewSupplier() throws Exception {
         // 1. SETUP
         com.sisie.core.model.Supplier neu =
@@ -142,7 +142,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte 400 liefern, wenn E-Mail już istnieje (IllegalStateException)")
+    @DisplayName("Should return 400 when the email already exists (IllegalStateException)")
     void create_ShouldReturnBadRequestWhenEmailExists() throws Exception {
         // 1. SETUP
         com.sisie.core.model.Supplier neu =
@@ -151,7 +151,7 @@ class SupplierControllerTest {
 
         when(supplierService.create(any(com.sisie.core.model.Supplier.class)))
                 .thenThrow(new IllegalStateException(
-                        "Dostawca z adresem e-mail bestehend@example.de już istnieje"));
+                        "A supplier with email address bestehend@example.de already exists"));
 
         // 2. ACT & ASSERT
         mockMvc.perform(post("/api/suppliers")
@@ -159,7 +159,7 @@ class SupplierControllerTest {
                         .content(objectMapper.writeValueAsString(neu)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
-                        "Dostawca z adresem e-mail bestehend@example.de już istnieje"));
+                        "A supplier with email address bestehend@example.de already exists"));
 
         verify(supplierService, times(1))
                 .create(any(com.sisie.core.model.Supplier.class));
@@ -167,15 +167,15 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_WORKER")
-    @DisplayName("Sollte 400 liefern, wenn Nutzer keine MANAGER/ADMIN-Rolle hat (POST)")
+    @DisplayName("Should return 400 when the user has no MANAGER/ADMIN role (POST)")
     void create_ShouldReturnBadRequestWithoutManagerRole() throws Exception {
-        // 1. SETUP - bez stubu: @PreAuthorize odrzuca request PRZED serwisem,
-        // wiec supplierService w ogole nie zostanie wywolany
+        // 1. SETUP - no stub: @PreAuthorize rejects the request BEFORE the service,
+        // so supplierService is never invoked at all
 
         // 2. ACT & ASSERT
-        // Uwaga: GlobalExceptionHandler mapuje kazdy RuntimeException (takze
-        // AccessDeniedException) na 400 Bad Request - to konwencja tego projektu
-        // (porownaj ProductControllerTest.test_ShouldReturnBadRequestWehnUserHasNoPermission).
+        // Note: GlobalExceptionHandler maps every RuntimeException (including
+        // AccessDeniedException) to 400 Bad Request - this is a convention of this project
+        // (see ProductControllerTest.test_ShouldReturnBadRequestWehnUserHasNoPermission).
         mockMvc.perform(post("/api/suppliers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Neu\",\"email\":\"neu@example.de\"}"))
@@ -188,7 +188,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte bestehenden Lieferanten aktualisieren und JSON zurückgeben")
+    @DisplayName("Should update an existing supplier and return JSON")
     void update_ShouldUpdateExistingSupplier() throws Exception {
         // 1. SETUP
         com.sisie.core.model.Supplier updated =
@@ -214,7 +214,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte 400 liefern, gdy nowy e-mail już zajęty (IllegalStateException)")
+    @DisplayName("Should return 400 when the new email is already taken (IllegalStateException)")
     void update_ShouldReturnBadRequestWhenEmailTaken() throws Exception {
         // 1. SETUP
         com.sisie.core.model.Supplier updated =
@@ -223,7 +223,7 @@ class SupplierControllerTest {
 
         when(supplierService.update(eq(3L), any(com.sisie.core.model.Supplier.class)))
                 .thenThrow(new IllegalStateException(
-                        "Adres e-mail besetzt@example.de jest już zajęty przez innego dostawcę"));
+                        "Email address besetzt@example.de is already used by another supplier"));
 
         // 2. ACT & ASSERT
         mockMvc.perform(put("/api/suppliers/{id}", 3L)
@@ -231,14 +231,14 @@ class SupplierControllerTest {
                         .content(objectMapper.writeValueAsString(updated)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
-                        "Adres e-mail besetzt@example.de jest już zajęty przez innego dostawcę"));
+                        "Email address besetzt@example.de is already used by another supplier"));
     }
 
     /* ---------- delete ---------- */
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte Lieferanten löschen und Bestätigung zurückgeben")
+    @DisplayName("Should delete a supplier and return a confirmation")
     void delete_ShouldDeleteExistingSupplier() throws Exception {
         // 1. SETUP & ACT & ASSERT
         mockMvc.perform(delete("/api/suppliers/{id}", 5L))
@@ -251,21 +251,21 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser(authorities = "ROLE_MANAGER")
-    @DisplayName("Sollte 400 liefern beim Löschen nieistniejącego dostawcy (EntityNotFoundException)")
+    @DisplayName("Should return 400 when deleting a non-existent supplier (EntityNotFoundException)")
     void delete_ShouldReturnBadRequestWhenMissing() throws Exception {
         // 1. SETUP
         long supplierId = 99L;
         
-        // Poprawna składnia dla metody void:
+        // Correct syntax for a void method:
         doThrow(new EntityNotFoundException(String.format("Supplier with ID %d not found", supplierId)))
                 .when(supplierService).delete(supplierId); 
-                // Zauważ: .when(supplierService) - tutaj jest tylko obiekt, a .delete(supplierId) jest na końcu
+                // Note: .when(supplierService) - only the object here; .delete(supplierId) goes at the end
 
         // 2. ACT & ASSERT
         mockMvc.perform(delete("/api/suppliers/{id}", supplierId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Supplier with ID 99 not found")); // Upewnij się, że string w jsonPath zgadza się z tym w EntityNotFoundException
+                        .value("Supplier with ID 99 not found")); // Make sure the string in jsonPath matches the one in EntityNotFoundException
 
         verify(supplierService, times(1)).delete(supplierId);
     }

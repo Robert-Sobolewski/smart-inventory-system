@@ -42,28 +42,27 @@ class InventoryServiceTest {
 	/** getTotalStock function **/
 
 	@Test
-	@DisplayName("Sollte die korrekte Gesamtmenge fuer eine SKU berechnen")
+	@DisplayName("Should calculate the correct total quantity for a SKU")
 	void getTotalStock_ShouldReturnCorrectSum() {
 
-		// 1. SETUP (Vorbereitung)
+		// 1. SETUP
 		String sku = "SKU-123";
 		Product mockProduct = Product.builder().sku(sku).build();
 
-		// wir definieren, was der Mock zurueckgeben soll, wenn er aufgerufen wird
+		// define what the mock should return when called
 		when(productRepository.findBySku(sku)).thenReturn(Optional.of(mockProduct));
 
-		// wir simulieren zwei Batches im Lager: einen mit 10 Stueck und einen mit 5
-		// Stueck
+		// simulate two batches in stock: one with 10 units and one with 5 units
 		StockBatch batch1 = StockBatch.builder().quantity(10).build();
 		StockBatch batch2 = StockBatch.builder().quantity(5).build();
 
 		when(stockBatchRepository.findByProductOrderByReceivedDateAsc(mockProduct)).thenReturn(List.of(batch1, batch2));
 
-		// 2. ACT (Ausfuehrung)
+		// 2. ACT
 		int totalStock = inventoryService.getTotalStock(sku);
 
-		// 3. ASSERT ( Ueberpruefung)
-		assertEquals(15, totalStock, "Die Summe der Bestaende muss 15 sein");
+		// 3. ASSERT
+		assertEquals(15, totalStock, "The sum of the stock must be 15");
 
 	}
 
@@ -79,8 +78,8 @@ class InventoryServiceTest {
 		// 3. ACT & ASSERT
 		RuntimeException exception = assertThrows(RuntimeException.class, () -> inventoryService.getTotalStock(sku));
 
-		assertTrue(exception.getMessage().contains("nicht gefunden"),
-				"The Error message must contains 'nicht gefunden'");
+		assertTrue(exception.getMessage().contains("not found"),
+				"The error message must contain 'not found'");
 
 	}
 
@@ -93,7 +92,7 @@ class InventoryServiceTest {
 		Product mockProduct = Product.builder().sku(sku).build();
 
 		when(productRepository.findBySku(sku)).thenReturn(Optional.of(mockProduct));
-		// Wir simulieren eine LEERE Liste von Batches
+		// We simulate an EMPTY list of batches
 
 		when(stockBatchRepository.findByProductOrderByReceivedDateAsc(mockProduct)).thenReturn(List.of());
 
@@ -119,7 +118,7 @@ class InventoryServiceTest {
 		RuntimeException exception = assertThrows(RuntimeException.class,
 				() -> inventoryService.receiveGoods(sku, locationCode, quantity));
 
-		assertTrue(exception.getMessage().contains("nicht gefunden"), "Error message must contains 'nicht gefunden'");
+		assertTrue(exception.getMessage().contains("not found"), "Error message must contain 'not found'");
 
 	}
 
@@ -139,8 +138,8 @@ class InventoryServiceTest {
 		RuntimeException exception = assertThrows(RuntimeException.class,
 				() -> inventoryService.receiveGoods(sku, locationCode, quantity));
 
-		assertTrue(exception.getMessage().contains("Lagerplatz " + locationCode),
-				"Error message must contains 'LOCATION-NOT-EXIST'");
+		assertTrue(exception.getMessage().contains("Storage location " + locationCode),
+				"Error message must contain 'LOCATION-NOT-EXIST'");
 
 	}
 	
@@ -169,8 +168,8 @@ class InventoryServiceTest {
 				() -> assertEquals(quantity, stockBatch.getQuantity(),"Quantity must be the same.")
 				);
 		
-		// 4. VERIFY (Das Verhalten prüfen - DER PROFI-SCHRITT!)
-        // Wir prüfen, ob das Repository die save-Methode genau EINMAL aufgerufen hat
+		// 4. VERIFY (checking the behavior - THE PROFESSIONAL STEP!)
+        // We verify that the repository's save method was called exactly ONCE
         verify(stockBatchRepository, times(1)).save(any(StockBatch.class));
 		
 		
@@ -194,7 +193,7 @@ class InventoryServiceTest {
 		
 		// 3. ASSERT
 		
-		assertTrue(exception.getMessage().contains("Product nicht gefunden!"));
+		assertTrue(exception.getMessage().contains("Product not found!"));
 	}
 	
 	@Test
@@ -217,7 +216,7 @@ class InventoryServiceTest {
 				() -> inventoryService.issueGoods(sku, qty));
 		
 		// 3. ASSERT
-		assertTrue(exception.getMessage().contains("Quantity must Positiv sein!."));
+		assertTrue(exception.getMessage().contains("Quantity must be positive!"));
 				
 	}
 	
@@ -231,7 +230,7 @@ class InventoryServiceTest {
 		
 		Product mockProduct =Product.builder().sku(sku).build();
 		
-		// erstellt zwei Stock Batche mit 10 Stueck
+		// create two stock batches with 10 units each
 		StockBatch mockStockBatch1 = StockBatch.builder().product(mockProduct).quantity(10).
 				receivedDate(LocalDate.now().minusWeeks(1)) .build();
 		StockBatch mockStockBatch2 = StockBatch.builder().product(mockProduct).quantity(10).
@@ -246,7 +245,7 @@ class InventoryServiceTest {
 				()->inventoryService.issueGoods(sku, requiredQuantity));
 		
 		// 3. Assert
-		assertTrue(exception.getMessage().contains("Nicht genuegend Bestand fuer SKU"));
+		assertTrue(exception.getMessage().contains("Not enough stock for SKU"));
 		
 		
 	}

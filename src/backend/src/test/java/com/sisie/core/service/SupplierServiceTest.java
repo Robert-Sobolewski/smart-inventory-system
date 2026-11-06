@@ -19,7 +19,7 @@ import com.sisie.core.model.Supplier;
 import com.sisie.core.repository.SupplierRepository;
 
 /**
- * Testy jednostkowe SupplierService (czysty Mockito, bez kontekstu Springa).
+ * Unit tests for SupplierService (pure Mockito, no Spring context).
  */
 @ExtendWith(MockitoExtension.class)
 class SupplierServiceTest {
@@ -37,7 +37,7 @@ class SupplierServiceTest {
     /** getAllSuppliers **/
 
     @Test
-    @DisplayName("Sollte alle Lieferanten zurueckgeben")
+    @DisplayName("Should return all suppliers")
     void getAllSuppliers_ShouldReturnAll() {
         // 1. SETUP
         when(supplierRepository.findAll()).thenReturn(List.of(
@@ -48,14 +48,14 @@ class SupplierServiceTest {
         List<Supplier> result = service.getAllSuppliers();
 
         // 3. ASSERT
-        assertEquals(2, result.size(), "Musi zwrocic dwoch dostawcow");
+        assertEquals(2, result.size(), "Must return two suppliers");
         verify(supplierRepository, times(1)).findAll();
     }
 
     /** findById **/
 
     @Test
-    @DisplayName("Sollte Lieferanten nach ID finden")
+    @DisplayName("Should find a supplier by ID")
     void findById_ShouldReturnSupplierWhenExists() {
         // 1. SETUP
         Supplier existing = supplier(1L, "Lieferant A", "a@example.de");
@@ -65,11 +65,11 @@ class SupplierServiceTest {
         Supplier result = service.findById(1L);
 
         // 3. ASSERT
-        assertEquals("Lieferant A", result.getName(), "Nazwa musi sie zgadzac");
+        assertEquals("Lieferant A", result.getName(), "The name must match");
     }
 
     @Test
-    @DisplayName("Sollte EntityNotFoundException werfen, wenn Lieferant nicht existiert")
+    @DisplayName("Should throw EntityNotFoundException when the supplier does not exist")
     void findById_ShouldThrowWhenMissing() {
         // 1. SETUP
         when(supplierRepository.findById(99L)).thenReturn(Optional.empty());
@@ -78,14 +78,14 @@ class SupplierServiceTest {
         Exception ex = assertThrows(EntityNotFoundException.class,
                 () -> service.findById(99L));
 
-        assertTrue(ex.getMessage().contains("nie został znaleziony"),
-                "Komunikat musi informowac o braku dostawcy");
+        assertTrue(ex.getMessage().contains("not found"),
+                "The error must inform about a missing supplier");
     }
 
     /** create **/
 
     @Test
-    @DisplayName("Sollte neuen Lieferanten anlegen")
+    @DisplayName("Should create a new supplier")
     void create_ShouldSaveNewSupplier() {
         // 1. SETUP
         Supplier neu = supplier(null, "Neu", "neu@example.de");
@@ -97,12 +97,12 @@ class SupplierServiceTest {
         Supplier result = service.create(neu);
 
         // 3. ASSERT + 4. VERIFY
-        assertEquals("Neu", result.getName(), "Nazwa nowego dostawcy");
+        assertEquals("Neu", result.getName(), "Name of the new supplier");
         verify(supplierRepository, times(1)).save(neu);
     }
 
     @Test
-    @DisplayName("Sollte IllegalStateException werfen, wenn E-Mail existiert")
+    @DisplayName("Should throw IllegalStateException when the e-mail already exists")
     void create_ShouldThrowWhenEmailExists() {
         // 1. SETUP
         Supplier neu = supplier(null, "Neu", "bestehend@example.de");
@@ -114,14 +114,14 @@ class SupplierServiceTest {
         Exception ex = assertThrows(IllegalStateException.class,
                 () -> service.create(neu));
 
-        assertTrue(ex.getMessage().contains("już istnieje"),
-                "Komunikat musi informowac o zajetym adresie e-mail");
+        assertTrue(ex.getMessage().contains("already exists"),
+                "The error must inform about a taken e-mail address");
     }
 
     /** update **/
 
     @Test
-    @DisplayName("Sollte Lieferanten aktualisieren")
+    @DisplayName("Should update a supplier")
     void update_ShouldUpdateExisting() {
         // 1. SETUP
         Supplier existing = supplier(1L, "Alt", "alt@example.de");
@@ -135,30 +135,30 @@ class SupplierServiceTest {
         Supplier result = service.update(1L, updated);
 
         // 3. ASSERT + VERIFY
-        assertEquals("Neu", result.getName(), "Nazwa po aktualizacji");
-        assertEquals("neu@example.de", result.getEmail(), "E-mail po aktualizacji");
+        assertEquals("Neu", result.getName(), "Name after update");
+        assertEquals("neu@example.de", result.getEmail(), "E-mail after update");
         verify(supplierRepository, times(1)).save(existing);
     }
 
     @Test
-    @DisplayName("Sollte Aktualisierung mit gleicher E-Mail erlauben")
+    @DisplayName("Should allow an update with the same e-mail")
     void update_ShouldAllowSameEmail() {
-        // 1. SETUP - taki sam adres e-mail, jaki ma juz ten dostawca
+        // 1. SETUP - the same e-mail address this supplier already has
         Supplier existing = supplier(1L, "Alt", "alt@example.de");
         when(supplierRepository.findById(1L)).thenReturn(Optional.of(existing));
 
-        Supplier updated = supplier(null, "Neu", "alt@example.de"); // taki sam e-mail
+        Supplier updated = supplier(null, "Neu", "alt@example.de"); // same e-mail
         when(supplierRepository.save(any(Supplier.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // 2. ACT & 3. ASSERT - nie moze rzucic wyjatku o duplikacie e-maila
+        // 2. ACT & 3. ASSERT - must not throw a duplicate-e-mail exception
         assertDoesNotThrow(() -> service.update(1L, updated));
     }
 
     @Test
-    @DisplayName("Sollte IllegalStateException werfen, wenn neue E-Mail bereits belegt ist")
+    @DisplayName("Should throw IllegalStateException when the new e-mail is already taken")
     void update_ShouldThrowWhenNewEmailTakenByOther() {
-        // 1. SETUP - inny dostawca juz ma ten adres e-mail
+        // 1. SETUP - another supplier already has this e-mail address
         Supplier existing = supplier(1L, "Alt", "alt@example.de");
         when(supplierRepository.findById(1L)).thenReturn(Optional.of(existing));
 
@@ -166,21 +166,21 @@ class SupplierServiceTest {
         when(supplierRepository.findByEmail("besetzt@example.de"))
                 .thenReturn(Optional.of(supplier(2L, "Inhaber", "besetzt@example.de")));
 
-        // 2. ACT & 3. ASSERT - nowy e-mail inny od obecnego i juz zajety => wyjatek
+        // 2. ACT & 3. ASSERT - new e-mail differs from the current one and is already taken => exception
         Exception ex = assertThrows(IllegalStateException.class,
                 () -> service.update(1L, updated));
 
-        assertTrue(ex.getMessage().contains("jest już zajęty"),
-                "Komunikat musi informowac o zajetym adresie e-mail");
+        assertTrue(ex.getMessage().contains("is already used by another supplier"),
+                "The error must inform about a taken e-mail address");
 
-        // 4. VERIFY - nic nie moglo zostac zapisane
+        // 4. VERIFY - nothing must have been saved
         verify(supplierRepository, never()).save(any(Supplier.class));
     }
 
     /** delete **/
 
     @Test
-    @DisplayName("Sollte Lieferanten loeschen")
+    @DisplayName("Should delete a supplier")
     void delete_ShouldDeleteExisting() {
         // 1. SETUP
         when(supplierRepository.findById(5L))
@@ -194,7 +194,7 @@ class SupplierServiceTest {
     }
 
     @Test
-    @DisplayName("Sollte EntityNotFoundException werfen beim Loeschen nieistniejacego")
+    @DisplayName("Should throw EntityNotFoundException when deleting a non-existent supplier")
     void delete_ShouldThrowWhenMissing() {
         // 1. SETUP
         when(supplierRepository.findById(99L)).thenReturn(Optional.empty());
@@ -202,7 +202,7 @@ class SupplierServiceTest {
         // 2. ACT & 3. ASSERT
         assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 
-        // 4. VERIFY - delete nie mogl zostac wywolany
+        // 4. VERIFY - delete must not have been called
         verify(supplierRepository, never()).deleteById(99L);
     }
 }

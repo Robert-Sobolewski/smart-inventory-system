@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Einzeiliger Bestandsbericht fuer ein Produkt auf dem Dashboard.
- * Aggregiert die Menge ueber alle Lagerplaetze und markiert Low-Stock-Faelle.
+ * Single-row stock report for one product on the dashboard.
+ * Aggregates quantity across all storage locations and marks low-stock cases.
  */
 @Data
 @Builder
@@ -19,12 +19,12 @@ public class StockSummaryItem {
 	private String name;
 	private String category;
 
-	/** Gesamtbestand des Produkts ueber alle Lagerplaetze (Stueck). */
+	/** Total stock of the product across all storage locations (units). */
 	private Integer totalQuantity;
 
-	/** Konfigurierter Schwellenwert aus der Produkttabelle. */
+	/** Configured threshold from the product table. */
 	private Integer minStockLevel;
 
-	/** true, wenn totalQuantity unter dem Schwellenwert liegt. */
+	/** true when totalQuantity is below the threshold. */
 	private boolean lowStock;
 }

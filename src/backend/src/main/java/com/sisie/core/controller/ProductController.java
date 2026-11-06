@@ -19,8 +19,8 @@ import com.sisie.core.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Product Kontroller Lombok erstellt automatisch den Konstructor fur das
- * Repository (Dependency Injection)
+ * Product controller. Lombok automatically generates the constructor for the
+ * repository (dependency injection).
  */
 @RestController
 @RequestMapping("/api/products")
@@ -43,7 +43,7 @@ public class ProductController {
 
 
 	/**
-	 * Sucht ein Produkt ueber die SKU
+	 * Looks up a product by its SKU.
 	 * 
 	 * @return Product
 	 */
@@ -52,14 +52,13 @@ public class ProductController {
 	public Product getProduct(@PathVariable String sku) {
 
 		return productRepository.findBySku(sku)
-				.orElseThrow(() -> new RuntimeException("Product mit SKU: " + sku + " nicht gefunden!"));
+				.orElseThrow(() -> new RuntimeException("Product with SKU " + sku + " not found!"));
 	}
 
 	/**
-	 * Erstellt ein neues Produkt oder gibt das bestehende zurrueck, falls die SKU
-	 * existiert.
+	 * Creates a new product. If the SKU already exists, a RuntimeException is thrown.
 	 * 
-	 * @return - Bestaetingung erstellung Prozess
+	 * @return - confirmation of the creation process
 	 */
     @PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/create")
@@ -67,7 +66,7 @@ public class ProductController {
 
 		Optional<Product> existing = productRepository.findBySku(request.getSku());
 		if (existing.isPresent()) {
-			throw new RuntimeException(String.format("Product mit SKU %s existiert bereits!", request.getSku()));
+			throw new RuntimeException(String.format("Product with SKU %s already exists!", request.getSku()));
 		}
 
 		Product p = Product.builder().sku(request.getSku()).name(request.getName()).category(request.getCategory())
@@ -81,7 +80,7 @@ public class ProductController {
 	@GetMapping("/test")
 	public String testDatabase() {
 
-		// Alle Produkte auslesen, um zu pruefen ob es geklappt hat
+		// Read all products back to verify it worked
 		long count = productRepository.count();
 
 		return String.format("Datenbank-Check OK! Anzahl Produkte: %d", count);

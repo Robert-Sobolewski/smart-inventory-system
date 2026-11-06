@@ -19,8 +19,8 @@ public class DatabaseConfig {
 	}
 
 	/**
-	 * Diese Methode wird einmalig nach dem Start der Anwendung ausgefuehrt.
-	 * Sie stellt sicher, dass SQLite Foreign Keys erwingt.
+	 * Runs once after the application starts.
+	 * Ensures that SQLite enforces foreign keys.
 	 */
 	@PostConstruct
 	public void enableForeignKeys() {

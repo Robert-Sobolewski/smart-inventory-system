@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sisie.core.model.Supplier;
 
 /**
- * Supplier Kontroller. Steuert die HTTP-Endpoints fuer Lieferanten.
+ * Supplier controller. Handles the HTTP endpoints for suppliers.
  */
 @RestController
 @RequestMapping("/api/suppliers")
@@ -28,34 +28,34 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
-    /** Liefert alle Lieferanten zurueck. */
+    /** Returns all suppliers. */
     @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
     @GetMapping
     public List<Supplier> getAllSuppliers() {
         return supplierService.getAllSuppliers();
     }
 
-    /** Sucht einen Lieferanten anhand der ID. */
+    /** Looks up a supplier by ID. */
     @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
     @GetMapping("/{id}")
     public Supplier getById(@PathVariable Long id) {
         return supplierService.findById(id);
     }
 
-    /** Erstellt einen neuen Lieferanten. */
+    /** Creates a new supplier. */
     @PostMapping
     public ResponseEntity<String> createSupplier(@RequestBody Supplier supplier) {
         com.sisie.core.model.Supplier created = supplierService.create(supplier);
         return ResponseEntity.ok("Lieferant " + created.getName() + " erfolgreich angelegt (ID: " + created.getId() + ")");
     }
 
-    /** Aktualisiert einen bestehenden Lieferanten anhand der ID. */
+    /** Updates an existing supplier by ID. */
     @PutMapping("/{id}")
     public Supplier updateSupplier(@PathVariable Long id, @RequestBody Supplier updated) {
         return supplierService.update(id, updated);
     }
 
-    /** Loescht einen Lieferanten anhand der ID. */
+    /** Deletes a supplier by ID. */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSupplier(@PathVariable Long id) {
         supplierService.delete(id);

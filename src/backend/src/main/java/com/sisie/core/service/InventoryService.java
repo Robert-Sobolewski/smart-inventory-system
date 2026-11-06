@@ -28,19 +28,19 @@ public class InventoryService {
 	private final StockBatchRepository stockBatchRepository;
 
 	/**
-	 * Bucht Ware in das Lager ein (Goods Receipt).
+	 * Books goods into stock (goods receipt).
 	 */
 	@Transactional
 	public StockBatch receiveGoods(String sku, String locationCode, Integer quantity) {
 
-		// 1. Validierung: Product and location
+		// 1. Validation: product and location
 		Product product = productRepository.findBySku(sku)
-				.orElseThrow(() -> new RuntimeException("Product mit sku: " + sku + " nicht gefunden!"));
+				.orElseThrow(() -> new RuntimeException("Product with SKU " + sku + " not found!"));
 
 		Location location = locationRepository.findByLocationCode(locationCode)
-				.orElseThrow(() -> new RuntimeException("Lagerplatz " + locationCode + " existiert nicht!"));
+				.orElseThrow(() -> new RuntimeException("Storage location " + locationCode + " does not exist!"));
 
-		// 2. Erstellung eines neuen Batches (FIFO- heutiges Datum)
+		// 2. Create a new batch (FIFO - today's date)
 		StockBatch sbatch = StockBatch.builder().product(product).location(location).quantity(quantity)
 				.receivedDate(LocalDate.now()).build();
 
@@ -49,21 +49,20 @@ public class InventoryService {
 	}
 
 	/**
-	 * Buch Ware aus dem Lager aus unten Anwendung des FIFO-Prinzips (Goods Issue).
+	 * Issues goods out of stock, applying the FIFO principle (goods issue).
 	 */
 	@Transactional
 	public void issueGoods(String sku, Integer quantityToIssue) {
 
 		Product product = productRepository.findBySku(sku)
-				.orElseThrow(() -> new RuntimeException("Product nicht gefunden!"));
+				.orElseThrow(() -> new RuntimeException("Product not found!"));
 
-		// 1. Alle Batches fuer dieses Produkt holen, sortiert nach Datum (Aelteste
-		// zuerst!)
+		// 1. Fetch all batches for this product, sorted by date (oldest first!)
 		List<StockBatch> batches = stockBatchRepository.findByProductOrderByReceivedDateAsc(product);
 
-		// When quantityToIssue is less or equal Zero throw exception
+		// When quantityToIssue is less or equal zero throw an exception
 		if (quantityToIssue <= 0) {
-			throw new RuntimeException("Quantity must Positiv sein!.");
+			throw new RuntimeException("Quantity must be positive!");
 		}
 		int remainingToIssue = quantityToIssue;
 
@@ -74,35 +73,35 @@ public class InventoryService {
 			int currentBatchQty = batch.getQuantity();
 
 			if (currentBatchQty <= remainingToIssue) {
-				// Batch wird komplett geleert
+				// The batch is completely emptied
 				remainingToIssue -= currentBatchQty;
 				
-				batch.setQuantity(0);// erstellt quantity als zero: batch.setQuantity(0);
+				batch.setQuantity(0); // mark the batch as fully consumed
 			} else {
-				// Batch wird teilweise geleert
+				// The batch is partially emptied
 				batch.setQuantity(currentBatchQty - remainingToIssue);
 				remainingToIssue = 0;
 			}
 		}
 
-		// Bestehlung ist zu groess
+		// The requested quantity exceeds available stock
 		if (remainingToIssue > 0) {
 			throw new RuntimeException(
-					"Nicht genuegend Bestand fuer SKU " + sku + ". Fehlende Menge: " + remainingToIssue);
+					"Not enough stock for SKU " + sku + ". Missing quantity: " + remainingToIssue);
 		}
 
-		// Alle geaenderten Batches speichern
+		// Save all modified batches
 		stockBatchRepository.saveAll(batches);
 	}
 
 	/**
-	 * Berechnet den Gesamtbestand eines Produkts ueber alle Lagerplaetze hinweg.
+	 * Calculates the total stock of a product across all storage locations.
 	 */
 	public Integer getTotalStock(String sku) {
 
 		// 1. Validation
 		Product product = productRepository.findBySku(sku)
-				.orElseThrow(() -> new RuntimeException("Product sku: " + sku + " nicht gefunden!"));
+				.orElseThrow(() -> new RuntimeException("Product with SKU " + sku + " not found!"));
 
 		return stockBatchRepository.findByProductOrderByReceivedDateAsc(product).stream()
 				.mapToInt(StockBatch::getQuantity).sum();

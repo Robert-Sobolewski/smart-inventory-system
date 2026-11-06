@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Repraesentiert einen User im Warehouse.
+ * Represents a user in the warehouse.
  */
 @Entity
 @Table(name = "users")

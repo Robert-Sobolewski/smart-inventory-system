@@ -13,14 +13,14 @@ import com.sisie.core.model.StockBatch;
 public interface StockBatchRepository extends JpaRepository<StockBatch, Long> {
 	
 	/**
-	 * Findet alle Batches eines Produkts, sortiert nach dem Eingangsdatum (aufsteigend).
-	 * Das ist die Basis fuer FIFO: Die aeltesten Batches kommen zuerst!
+	 * Finds all batches of a product, sorted by receipt date (ascending).
+	 * This is the basis for FIFO: the oldest batches come first!
 	 */
 	List<StockBatch> findByProductOrderByReceivedDateAsc(Product product);
 
 	/**
-	 * Findet alle Batches an einem Lagerplatz.
-	 * Wird vom Delete-Guard verwendet: Ein belegter Lagerplatz darf nicht geloescht werden.
+	 * Counts all batches at a storage location.
+	 * Used by the delete guard: an occupied location must not be deleted.
 	 */
 	long countByLocation(Location location);
 }

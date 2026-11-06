@@ -36,19 +36,19 @@ public class LocationController {
     @PreAuthorize("hasAnyRole('WORKER','MANAGER','ADMIN')")
 	public String testDatabase() {
 
-		// Ein location erstellen, Beispiel: "A-01-12" (Regal A, Ebene 1, Fach 12)
+		// Create a location, e.g. "A-01-12" (shelf A, level 1, slot 12)
 		Location location = Location.builder().locationCode("A-01-12").build();
 
-		// Speichern in die Datenbank
+		// Save to the database
 		locationRepository.save(location);
 
-		// Alle Lokationene auslesen , um zu pruefen ob es geklappt hat
+		// Read all locations back to verify it worked
 		long count = locationRepository.count();
 		return String.format("Datenbank-Test erfolgreich! Aktuelle Anzahl an Lokationen: %d", count);
 	}
 
 	/**
-	 * Liefert alle Lagerplaetze als Liste zurueck.
+	 * Returns all storage locations as a list.
 	 *
 	 * @return List of locations
 	 */
@@ -65,11 +65,11 @@ public class LocationController {
 			throw new RuntimeException("locationCode can't be null or empty");
 		}
 
-		// Prufen ob es sonst existiert
+		// Check whether the code already exists
 		Optional<Location> exists = locationRepository.findByLocationCode(request.getLocationCode());
 
 		if (exists.isPresent()) {
-			throw new RuntimeException("Lagerplatz " + request.getLocationCode() + " existiert bereits!");
+			throw new RuntimeException("Storage location " + request.getLocationCode() + " already exists!");
 		}
 
 		Location loc = Location.builder().locationCode(request.getLocationCode()).build();
@@ -80,10 +80,10 @@ public class LocationController {
 	}
 
 	/**
-	 * Aktualisiert den Lagerplatz-Code eines bestehenden Lagerplatzes.
+	 * Updates the location code of an existing storage location.
 	 *
-	 * @param id      ID des Lagerplatzes
-	 * @param request neuer locationCode
+	 * @param id      ID of the storage location
+	 * @param request new locationCode
 	 * @return success message
 	 */
 	@PutMapping("/{id}")
@@ -93,18 +93,18 @@ public class LocationController {
 			throw new RuntimeException("locationCode can't be null or empty");
 		}
 
-		// Pruefen ob der Lagerplatz ueberhaupt existiert
+		// Check whether the location exists at all
 		Optional<Location> location = locationRepository.findById(id);
 
 		if (location.isEmpty()) {
-			throw new RuntimeException("Lagerplatz mit ID " + id + " existiert nicht!");
+			throw new RuntimeException("Storage location with ID " + id + " does not exist!");
 		}
 
-		// Prufen ob der neue Code von einem ANDEREN Lagerplatz belegt ist
+		// Check whether the new code is already taken by ANOTHER location
 		Optional<Location> duplicate = locationRepository.findByLocationCode(request.getLocationCode());
 
 		if (duplicate.isPresent() && !duplicate.get().getId().equals(id)) {
-			throw new RuntimeException("Lagerplatz " + request.getLocationCode() + " existiert bereits!");
+			throw new RuntimeException("Storage location " + request.getLocationCode() + " already exists!");
 		}
 
 		location.get().setLocationCode(request.getLocationCode());
@@ -114,28 +114,28 @@ public class LocationController {
 	}
 
 	/**
-	 * Loescht einen Lagerplatz.
-	 * Guard: Ein Lagerplatz, an dem noch StockBatches liegen, darf NICHT geloescht werden.
+	 * Deletes a storage location.
+	 * Guard: a location that still has StockBatches must NOT be deleted.
 	 *
-	 * @param id ID des Lagerplatzes
+	 * @param id ID of the storage location
 	 * @return success message
 	 */
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteLocation(@PathVariable Long id) {
 
-		// Pruefen ob der Lagerplatz ueberhaupt existiert
+		// Check whether the location exists at all
 		Optional<Location> location = locationRepository.findById(id);
 
 		if (location.isEmpty()) {
-			throw new RuntimeException("Lagerplatz mit ID " + id + " existiert nicht!");
+			throw new RuntimeException("Storage location with ID " + id + " does not exist!");
 		}
 
-		// Guard: keine Loeschung, solange noch Batches an diesem Ort liegen
+		// Guard: no deletion while batches are still at this location
 		long batchCount = stockBatchRepository.countByLocation(location.get());
 
 		if (batchCount > 0) {
-			throw new RuntimeException("Lagerplatz ID " + id + " kann nicht geloescht werden, da dort noch "
-					+ batchCount + " StockBatch(es) liegen!");
+			throw new RuntimeException("Storage location ID " + id + " cannot be deleted because there are still "
+					+ batchCount + " StockBatch(es) at it!");
 		}
 
 		locationRepository.delete(location.get());

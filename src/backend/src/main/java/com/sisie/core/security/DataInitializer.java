@@ -16,11 +16,10 @@ public class DataInitializer {
 	public CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
 		return args -> {
-			// Pruefen, ob bereits ein Admin existiert, damit wir nicht bei jedem Start
-			// einen neuen anlegen
+			// Check whether an admin already exists, so we do not create a new one on every start
 			if (userRepository.findByUsername("admin").isEmpty()) {
 
-				// Erstellung eines Admin-Nutzers mit verschluesseltem Passwort!
+				// Create an admin user with an encoded password!
 				User admin = User.builder().username("admin").password(passwordEncoder.encode("Admin123!"))
 						.role(Role.ROLE_ADMIN).build();
 				userRepository.save(admin);

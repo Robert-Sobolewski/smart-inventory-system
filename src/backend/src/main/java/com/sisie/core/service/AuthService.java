@@ -19,7 +19,7 @@ public class AuthService {
 	private final JwtTokenProvider tokenProvider;
 
 	/**
-	 * Der Login-Prozess: Pruefen -> Validieren -> Token ausstellen.
+	 * The login process: check -> validate -> issue token.
 	 * 
 	 * @param username
 	 * @param rawPassword
@@ -32,16 +32,16 @@ public class AuthService {
 			throw new IllegalArgumentException("Username and Password are required");
 		}
 
-		// 1. Nutzer in der DB suchen
+		// 1. Look up the user in the database
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-		// 2. Wenn user existieren , pruefen Passwort
+		// 2. If the user exists, check the password
 		if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
 			throw new RuntimeException("Invalid credentials");
 		}
 
-		// 3. Wenn alles ok ist , Token generieren und zurueckgeben
+		// 3. If everything is OK, generate and return the token
 		String token = tokenProvider.generateToken(user.getUsername(), user.getRole().name());
 
 		return AuthResponse.builder().token(token).username(username).role(user.getRole().name()).build();

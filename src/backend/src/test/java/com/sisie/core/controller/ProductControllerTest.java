@@ -95,7 +95,7 @@ class ProductControllerTest {
 
 		// Act & Assert
 		mockMvc.perform(get("/api/products/{sku}", mockSku)).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Product mit SKU: SKU-123 nicht gefunden!"));
+				.andExpect(jsonPath("$.message").value("Product with SKU SKU-123 not found!"));
 
 		verify(productRepository, times(1)).findBySku(mockSku);
 	}
@@ -157,7 +157,7 @@ class ProductControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(mockRequest)))
 		.andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.message").value("Product mit SKU SIS-SEN-042 existiert bereits!"));
+		.andExpect(jsonPath("$.message").value("Product with SKU SIS-SEN-042 already exists!"));
 		
 		verify(productRepository,times(1)).findBySku(sku);
 	}

@@ -20,7 +20,7 @@ import com.sisie.core.repository.ProductRepository;
 import com.sisie.core.repository.StockBatchRepository;
 
 /**
- * Testy jednostkowe DashboardService (czysty Mockito, bez kontekstu Springa).
+ * Unit tests for DashboardService (pure Mockito, no Spring context).
  */
 @ExtendWith(MockitoExtension.class)
 class DashboardServiceTest {
@@ -38,7 +38,7 @@ class DashboardServiceTest {
 	private DashboardService service;
 
 	private static Product product(Long id, String sku, Integer minStockLevel) {
-		return Product.builder().id(id).sku(sku).name("Produkt " + sku)
+		return Product.builder().id(id).sku(sku).name("Product " + sku)
 				.category("Test").minStockLevel(minStockLevel).build();
 	}
 
@@ -49,9 +49,9 @@ class DashboardServiceTest {
 	/** getStockOverview **/
 
 	@Test
-	@DisplayName("Produkt ohne Bestandsbaetze soll Gesamtbestand 0 und Low-Stock liefern")
+	@DisplayName("A product without stock batches should return total stock 0 and low-stock flag")
 	void getStockOverview_ShouldReturnZeroAndLowStockWhenNoBatches() {
-		// 1. SETUP - produkt bez zadnych partii magazynowych, minStockLevel = null
+		// 1. SETUP - product without any stock batches, minStockLevel = null
 		Product p = product(1L, "SKU-A", null);
 		when(productRepository.findAll()).thenReturn(List.of(p));
 		when(stockBatchRepository.findByProductOrderByReceivedDateAsc(p))
@@ -60,19 +60,19 @@ class DashboardServiceTest {
 		// 2. ACT
 		List<StockSummaryItem> result = service.getStockOverview();
 
-		// 3. ASSERT - domyślny prog to 10, wiec 0 < 10 => lowStock
-		assertEquals(1, result.size(), "Musi byc jedna pozycja");
+		// 3. ASSERT - the default threshold is 10, so 0 < 10 => low stock
+		assertEquals(1, result.size(), "There must be exactly one entry");
 		StockSummaryItem item = result.get(0);
 		assertEquals("SKU-A", item.getSku());
-		assertEquals(0, item.getTotalQuantity(), "Brak partii oznacza zero sztuk");
-		assertEquals(10, item.getMinStockLevel(), "Null ma znaczenie domyślnego progu 10");
-		assertTrue(item.isLowStock(), "Zero sztuk to zawsze stan niskiego magazynu");
+		assertEquals(0, item.getTotalQuantity(), "No batches means zero units");
+		assertEquals(10, item.getMinStockLevel(), "null means the default threshold of 10");
+		assertTrue(item.isLowStock(), "zero units is always a low-stock state");
 	}
 
 	@Test
-	@DisplayName("Mehrere Baetze sollen zur Gesamtmenge summiert werden")
+	@DisplayName("Multiple batches should be summed into the total quantity")
 	void getStockOverview_ShouldSumQuantitiesAcrossBatches() {
-		// 1. SETUP - dwie partie tego samego produktu
+		// 1. SETUP - two batches of the same product
 		Product p = product(2L, "SKU-B", 5);
 		when(productRepository.findAll()).thenReturn(List.of(p));
 		when(stockBatchRepository.findByProductOrderByReceivedDateAsc(p))
@@ -81,16 +81,16 @@ class DashboardServiceTest {
 		// 2. ACT
 		List<StockSummaryItem> result = service.getStockOverview();
 
-		// 3. ASSERT - 7 + 3 = 10 >= progu 5 => nie low stock
-		assertEquals(10, result.get(0).getTotalQuantity(), "Suma partii musi wynosic 10");
+		// 3. ASSERT - 7 + 3 = 10 >= threshold 5 => not low stock
+		assertEquals(10, result.get(0).getTotalQuantity(), "The sum of batches must be 10");
 		assertEquals(5, result.get(0).getMinStockLevel());
-		assertFalse(result.get(0).isLowStock(), "10 sztuk przy progu 5 to nie low stock");
+		assertFalse(result.get(0).isLowStock(), "10 units with a threshold of 5 is not low stock");
 	}
 
 	@Test
-	@DisplayName("Bestand unter dem Schwellenwert soll als Low-Stock markiert werden")
+	@DisplayName("Stock below the threshold should be marked as low stock")
 	void getStockOverview_ShouldFlagLowStockBelowThreshold() {
-		// 1. SETUP - stan nizszy od skonfigurowanego progu
+		// 1. SETUP - stock below the configured threshold
 		Product p = product(3L, "SKU-C", 20);
 		when(productRepository.findAll()).thenReturn(List.of(p));
 		when(stockBatchRepository.findByProductOrderByReceivedDateAsc(p))
@@ -101,13 +101,13 @@ class DashboardServiceTest {
 
 		// 3. ASSERT - 15 < 20 => low stock
 		assertEquals(15, result.get(0).getTotalQuantity());
-		assertTrue(result.get(0).isLowStock(), "15 sztuk przy progu 20 to low stock");
+		assertTrue(result.get(0).isLowStock(), "15 units with a threshold of 20 is low stock");
 	}
 
 	/** countLocations **/
 
 	@Test
-	@DisplayName("Lagerplatzanzahl soll aus dem Repository kommen")
+	@DisplayName("The location count should come from the repository")
 	void countLocations_ShouldReturnRepositoryCount() {
 		// 1. SETUP
 		when(locationRepository.count()).thenReturn(4L);
@@ -116,16 +116,16 @@ class DashboardServiceTest {
 		long result = service.countLocations();
 
 		// 3. ASSERT + VERIFY
-		assertEquals(4L, result, "Musi zwracac liczbe z repository");
+		assertEquals(4L, result, "Must return the count from the repository");
 		verify(locationRepository, times(1)).count();
 	}
 
 	/** getTotalUnits **/
 
 	@Test
-	@DisplayName("Gesamtmenge soll ueber alle Produkte summiert werden")
+	@DisplayName("The total quantity should be summed across all products")
 	void getTotalUnits_ShouldSumAcrossAllProducts() {
-		// 1. SETUP - dwa produkty: 7 sztuk i 3 sztuki
+		// 1. SETUP - two products: 7 units and 3 units
 		Product a = product(1L, "SKU-A", null);
 		Product b = product(2L, "SKU-B", null);
 		when(productRepository.findAll()).thenReturn(List.of(a, b));
@@ -138,15 +138,15 @@ class DashboardServiceTest {
 		int result = service.getTotalUnits();
 
 		// 3. ASSERT - 7 + 3 = 10
-		assertEquals(10, result, "Suma wszystkich produktow musi wynosic 10");
+		assertEquals(10, result, "The sum across all products must be 10");
 	}
 
 	/** countLowStockProducts **/
 
 	@Test
-	@DisplayName("Nur Produkte unter dem Schwellenwert sollen gezahlt werden")
+	@DisplayName("Only products below the threshold should be counted")
 	void countLowStockProducts_ShouldCountOnlyBelowThreshold() {
-		// 1. SETUP - jeden produkt pod progiem, drugi nad progiem
+		// 1. SETUP - one product below the threshold, the other above it
 		Product low = product(1L, "SKU-LOW", 20);
 		Product ok = product(2L, "SKU-OK", 5);
 		when(productRepository.findAll()).thenReturn(List.of(low, ok));
@@ -158,7 +158,7 @@ class DashboardServiceTest {
 		// 2. ACT
 		long result = service.countLowStockProducts();
 
-		// 3. ASSERT - tylko jeden produkt pod progiem
-		assertEquals(1L, result, "Tylko produkty pod progiem maja byc policzone");
+		// 3. ASSERT - only one product is below the threshold
+		assertEquals(1L, result, "Only products below the threshold must be counted");
 	}
 }
