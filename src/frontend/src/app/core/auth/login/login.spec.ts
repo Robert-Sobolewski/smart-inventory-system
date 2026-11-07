@@ -12,8 +12,8 @@ describe('Login', () => {
   let mockRouter: any;
 
   beforeEach(async () => {
-    // login() w serwisie zwraca Observable — mock musi to odzwierciedlać,
-    // bo komponent wywołuje .subscribe() na wyniku
+    // login() in the service returns an Observable — the mock must mirror that,
+    // because the component calls .subscribe() on the result
     mockAuthService = {
       login: vi.fn().mockReturnValue(of({ token: 'ey...AFTD', username: 'worker' })),
       saveToken: vi.fn(),
@@ -51,7 +51,7 @@ describe('Login', () => {
   });
 
   it('should call login service with login success', () => {
-    // setup — mock zwraca Observable, żeby .subscribe() w komponencie zadziałało
+    // setup — the mock returns an Observable so .subscribe() in the component works
     const mockRes = { token: 'ey....AFTD', username: 'worker' };
     mockAuthService.login.mockReturnValue(of(mockRes));
     const componentAny = component as any;
@@ -64,12 +64,12 @@ describe('Login', () => {
     passwordInput.nativeElement.value = 'Worker123!';
     passwordInput.nativeElement.dispatchEvent(new Event('input'));
 
-    // act — onSubmit($event) jest przypięte do <form> (submit), nie do buttona,
-    // więc triggerujemy submit na formularzu; event musi mieć preventDefault()
+    // act — onSubmit($event) is bound to the <form> (submit), not the button,
+    // so we trigger submit on the form; the event must have preventDefault()
     const formEl = fixture.debugElement.query(By.css('form'));
     formEl.triggerEventHandler('submit', { preventDefault: () => {} });
 
-    // assert — komponent woła saveToken(res.token, res.username) — DWA argumenty
+    // assert — the component calls saveToken(res.token, res.username) — TWO arguments
     expect(mockAuthService.login).toHaveBeenCalledWith({
       username: 'worker',
       password: 'Worker123!',

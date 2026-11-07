@@ -6,7 +6,7 @@ import { ProductList } from './product-list';
 import { InventoryService } from '../../services/inventory-service';
 import { Product } from '../../models/product';
 
-// Lokalny kształt modelu formularza (w komponencie jest to prywatny interfejs)
+// Local shape of the form model (a private interface in the component)
 interface ProductFormShape {
   sku: string;
   name: string;
@@ -14,7 +14,7 @@ interface ProductFormShape {
   description: string;
 }
 
-// Widok testowy komponentu — odsłania protected members (jak w dashboard.spec.ts).
+// Test view of the component — exposes the protected members (as in dashboard.spec.ts).
 type TestableProductList = ProductList & {
   productModel: Signal<ProductFormShape>;
   saveError: Signal<string | null>;
@@ -38,7 +38,7 @@ describe('ProductList (component)', () => {
     return fixture.componentInstance as unknown as TestableProductList;
   }
 
-  // Stub eventu submit — preventDefault musi być prawdziwym spy (vi.fn), nie strzałką.
+  // Submit event stub — preventDefault must be a real spy (vi.fn), not an arrow function.
   function createSubmitEvent() {
     const event = { preventDefault: vi.fn() };
     return event as unknown as Event;
@@ -82,7 +82,7 @@ describe('ProductList (component)', () => {
 
       expect(event.preventDefault).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(1);
-      // puste opcjonalne pola -> undefined (backend zapisze NULL, nie "")
+      // empty optional fields -> undefined (the backend stores NULL, not "")
       expect(spy).toHaveBeenCalledWith({
         sku: 'RES-10K-OHM-001',
         name: 'Resistor 10k Ohm',
@@ -102,7 +102,7 @@ describe('ProductList (component)', () => {
 
       expect(c.savedMessage()).toBe('Product RES-10K-OHM-001 created.');
       expect(c.saveError()).toBeNull();
-      // formularz czyszczony po sukcesie — gotowy na kolejny produkt
+      // form cleared after success — ready for the next product
       expect(c.productModel()).toEqual({ sku: '', name: '', category: '', description: '' });
     });
 
@@ -113,11 +113,11 @@ describe('ProductList (component)', () => {
         .mockReturnValueOnce(of('ok'));
       c.productModel.set({ sku: 'RES-10K-OHM-001', name: 'Resistor 10k Ohm', category: '', description: '' });
 
-      c.onSubmit(createSubmitEvent()); // 1. próba — błąd z backendu
+      c.onSubmit(createSubmitEvent()); // 1st attempt — error from the backend
       expect(c.saveError()).toBe('Produkt mit SKU RES-10K-OHM-001 existiert bereits');
 
       c.productModel.set({ sku: 'RES-20K-OHM-001', name: 'Resistor 20k Ohm', category: '', description: '' });
-      c.onSubmit(createSubmitEvent()); // 2. próba — sukces
+      c.onSubmit(createSubmitEvent()); // 2nd attempt — success
 
       expect(c.saveError()).toBeNull();
       expect(c.savedMessage()).toBe('Product RES-20K-OHM-001 created.');
@@ -178,7 +178,7 @@ describe('ProductList (component)', () => {
       const c = createComponent();
       const spy = vi.spyOn(service, 'addProduct').mockReturnValue(of('ok'));
 
-      c.onSubmit(createSubmitEvent()); // pusty formularz -> invalid
+      c.onSubmit(createSubmitEvent()); // empty form -> invalid
 
       expect(spy).not.toHaveBeenCalled();
       expect(c.savedMessage()).toBeNull();
@@ -188,8 +188,8 @@ describe('ProductList (component)', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Testy renderowania template'u (DOM) — InventoryService jest w pełni zmockowany,
-// więc warstwa HTTP nie bierze udziału (wzór jak w dashboard.spec.ts).
+// Template rendering tests (DOM) — InventoryService is fully mocked,
+// so the HTTP layer does not take part (same pattern as in dashboard.spec.ts).
 // ─────────────────────────────────────────────────────────────────────────────
 describe('ProductList (template rendering)', () => {
   let fixture: ComponentFixture<ProductList>;
@@ -227,7 +227,7 @@ describe('ProductList (template rendering)', () => {
 
     const cards = fixture.nativeElement.querySelectorAll('.product-card');
     expect(cards.length).toBe(2);
-    // brak kategorii -> placeholder "—" (template: product.category ?? '—')
+    // missing category -> placeholder "—" (template: product.category ?? '—')
     expect(cards[0].textContent).toContain('Resistor 10k Ohm');
     expect(cards[0].textContent).toContain('RES-10K-OHM-001');
     expect(cards[1].textContent).toContain('Capacitor 100nF');
@@ -256,7 +256,7 @@ describe('ProductList (template rendering)', () => {
     const el = fixture.nativeElement.querySelector('.error-state');
     expect(el?.textContent).toContain('Connecting server error!');
 
-    // act — kliknięcie przycisku retry w DOM
+    // act — clicking the retry button in the DOM
     (fixture.nativeElement.querySelector('.error-state button') as HTMLButtonElement).click();
     // assert
     expect(reloadSpy).toHaveBeenCalledTimes(1);
@@ -266,7 +266,7 @@ describe('ProductList (template rendering)', () => {
     setupDom({ rows: [] });
     const btn = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
 
-    // pusty formularz -> disabled (sku i name wymagane)
+    // empty form -> disabled (sku and name required)
     expect(btn.disabled).toBe(true);
 
     component.productModel.set({ sku: 'RES-10K-OHM-001', name: 'Resistor 10k Ohm', category: '', description: '' });
@@ -279,12 +279,12 @@ describe('ProductList (template rendering)', () => {
     component.productModel.set({ sku: 'RES-10K-OHM-001', name: 'Resistor 10k Ohm', category: '', description: '' });
     fixture.detectChanges();
 
-    // act — submit przez handler komponentu (jak w prawdziwym formularzu)
+    // act — submit via the component handler (like in a real form)
     const event = { preventDefault: vi.fn() } as unknown as Event;
     component.onSubmit(event);
     fixture.detectChanges();
 
-    // assert — komunikat sukcesu widoczny dla użytkownika (role="status")
+    // assert — the success message is visible to the user (role="status")
     const msg = fixture.nativeElement.querySelector('.success-msg');
     expect(msg?.textContent).toContain('Product RES-10K-OHM-001 created.');
   });

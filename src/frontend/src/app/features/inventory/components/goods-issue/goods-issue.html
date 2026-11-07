@@ -1,7 +1,7 @@
 <section class="goods-issue">
   <h2>Goods Issue (Warenausgang)</h2>
 
-  <!-- issue goods form — FIFO: lokalizacji nie wybieramy, backend sam bierze od najstarszych batchy -->
+  <!-- issue goods form — FIFO: we do not pick a location, the backend takes from the oldest batches itself -->
   <form (submit)="onSubmit($event)">
     <h3>Issue Goods</h3>
     @if(issueMessage()){
@@ -19,7 +19,7 @@
       }
     }
 
-    <!-- stock preview: aktualny stan z GET /stock/{sku} — podstawa alertu braku towaru -->
+    <!-- stock preview: current stock from GET /stock/{sku} — basis of the out-of-stock alert -->
     @if(stockLoading()){
       <div class="stock-state" role="status">Checking stock...</div>
     } @else if(stockError()){
@@ -36,7 +36,7 @@
       }
     }
 
-    <!-- alert braku towaru: qty > stan -> submit zablokowany (decyzja v1: all-or-nothing) -->
+    <!-- out-of-stock alert: qty > stock -> submit blocked (v1 decision: all-or-nothing) -->
     @if(overStock()){
       <div class="stock-error" role="alert">Nicht genug Bestand! Verfuegbar: {{stockAvailable()}}, gewuenscht: {{issueModel().qty}}.</div>
     }

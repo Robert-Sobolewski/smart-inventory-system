@@ -1,40 +1,40 @@
 # Testing Guide — Frontend (Angular 22 + Vitest)
 
-> Praktyczny przewodnik do pisania testów jednostkowych w tym projekcie.
-> Wszystkie przykłady są **zweryfikowane** (`ng test frontend` → 24/24 passed, 2026-10-06).
-> Konwencja: komunikaty UI po niemiecku, komentarze/testy po polsku (język nauki).
+> A practical guide to writing unit tests in this project.
+> All examples are **verified** (`ng test frontend` → 24/24 passed, 2026-10-06).
+> Convention: UI messages in German (domain language), comments and tests in English.
 
-## 0. Setup — co już działa
+## 0. Setup — what already works
 
-| Element | Gdzie | Uwaga |
+| Element | Where | Note |
 |---|---|---|
-| Runner | **Vitest** (`@analogjs/vite-plugin-angular`) | Angular 22 domyślnie używa Vitest, nie Karma/Jasmine |
-| Konfiguracja | `src/frontend/vitest.config.ts` | `globals: true`, `environment: 'jsdom'` |
+| Runner | **Vitest** (`@analogjs/vite-plugin-angular`) | Angular 22 uses Vitest by default, not Karma/Jasmine |
+| Configuration | `src/frontend/vitest.config.ts` | `globals: true`, `environment: 'jsdom'` |
 | Coverage | `@vitest/coverage-v8` | `ng test frontend --watch=false --coverage` |
-| Setup plik | `src/test-setup.ts` | ładowany przez `setupFiles` |
+| Setup file | `src/test-setup.ts` | loaded via `setupFiles` |
 
-**Ważne:** `globals: true` oznacza, że `describe`, `it`, `expect`, `vi` są dostępne **globalnie — bez importu**. Nie musisz pisać `import { vi } from 'vitest'`.
+**Important:** `globals: true` means that `describe`, `it`, `expect`, `vi` are available **globally — without imports**. You do not need to write `import { vi } from 'vitest'`.
 
-Uruchamianie:
+Running the tests:
 ```bash
 cd src/frontend
-node ./node_modules/@angular/cli/bin/ng test frontend --watch=false            # pełny zestaw
+node ./node_modules/@angular/cli/bin/ng test frontend --watch=false            # full suite
 node ./node_modules/@angular/cli/bin/ng test frontend --watch=false --coverage # + coverage
-# pojedynczy plik (szybka pętla podczas pisania):
+# single file (fast loop while writing):
 node ./node_modules/@angular/cli/bin/ng test frontend --watch=false -t "Status"
 ```
 
 ---
 
-## 1. Test SERWISU — mockowanie HTTP bez sieci
+## 1. SERVICE TESTS — mocking HTTP without a network
 
-Serwisy w tym projekcie używają `HttpClient` (i `httpResource`). W teście **nie łączymy się z backendem** — podpinamy `HttpTestingController`, który przechwytuje każdy request i pozwala ręcznie "odpowiedzieć" (`flush`).
+Services in this project use `HttpClient` (and `httpResource`). In tests we **do not connect to the backend** — we plug in `HttpTestingController`, which intercepts every request and lets you manually "respond" (`flush`).
 
-Szkielet (patrz realny przykład: `services/logistics-service.examples.spec.ts`):
+Skeleton (see the real example: `services/logistics-service.examples.spec.ts`):
 
 ```ts
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';                 // ← TU, nie w /testing!
+import { provideHttpClient } from '@angular/common/http';                 // ← HERE, not in /testing!
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
 import { LogisticsService } from './logistics-service';
@@ -52,52 +52,52 @@ describe('LogisticsService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // FAIL, jeśli jakiś request nie został skonsumowany — łapie zapomniane mocki
+    httpMock.verify(); // FAILS if any request was not consumed — catches forgotten mocks
   });
 
-  it('getStock parsuje liczbę z plain text', async () => {
+  it('getStock parses a number from plain text', async () => {
     const qtyPromise = firstValueFrom(service.getStock('RES-10K-OHM-001'));
-    // expectOne: przechwyt requesta na ten URL (metoda + ścieżka muszą się zgadzać)
+    // expectOne: intercepts the request for this URL (method + path must match)
     const req = httpMock.expectOne('/api/logistics/stock/RES-10K-OHM-001');
     expect(req.request.method).toBe('GET');
-    // flush: symuluje odpowiedź backendu (tu plain text, bo responseType:'text')
+    // flush: simulates the backend response (plain text here, because responseType:'text')
     req.flush('Gesamtbestand fuer RES-10K-OHM-001 : 50 Stueck');
     expect(await qtyPromise).toBe(50);
   });
 
-  it('issueGoods wysyła payload do /issue', async () => {
+  it('issueGoods sends a payload to /issue', async () => {
     const msgPromise = firstValueFrom(service.issueGoods({ sku: 'SKU-001', qty: 5 }));
     const req = httpMock.expectOne('/api/logistics/issue');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ sku: 'SKU-001', qty: 5 }); // walidacja BODY
+    expect(req.request.body).toEqual({ sku: 'SKU-001', qty: 5 }); // BODY validation
     req.flush('Warenausgang (FIFO) fuer SKU: SKU-001 erfolgreich durchgefuert!');
     expect(await msgPromise).toContain('erfolgreich');
   });
 });
 ```
 
-### Pułapki serwisów HTTP w tym projekcie
-1. **`provideHttpClient` jest w `@angular/common/http`, NIE w `/testing`.** Import z `/testing` da błąd kompilacji (TS2305). To najczęstszy błąd przy pierwszym teście serwisu.
-2. **Plain text vs JSON.** Backend zwraca `ResponseEntity<String>` = plain text. Serwis używa `{ responseType: 'text' }`. W teście `req.flush(...)` musi więc dostarczać **tekst**, nie obiekt — inaczej test nie odzwierciedla rzeczywistości.
-3. **`httpResource` (nie Observable).** Pola typu `readonly locationResource = httpResource<...>()` to *sygnały*, nie Observable. Nie mockujesz ich przez `HttpTestingController.flush` wprost — sprawdzasz je po `fixture.detectChanges()` jako `component.locationResource.value()`.
-4. **⚠️ `httpResource` wysyła GET ASYNCHRONICZNIE (efekty Angulara).** Jeśli serwis ma pole `httpResource`, to przy `TestBed.inject(Serwis)` request GET idzie do kolejki testing backendu — ale **nie synchronicznie** (nie da się go `expectOne().flush()` w `beforeEach` — rzuca "found none"). Rozwiązanie: w `afterEach` drenuj pozostałe requesty PRZED `verify()`:
+### HTTP service pitfalls in this project
+1. **`provideHttpClient` lives in `@angular/common/http`, NOT in `/testing`.** Importing it from `/testing` is a compile error (TS2305). This is the most common mistake on your first service test.
+2. **Plain text vs JSON.** The backend returns `ResponseEntity<String>` = plain text. The service uses `{ responseType: 'text' }`. So in tests, `req.flush(...)` must deliver **text**, not an object — otherwise the test does not reflect reality.
+3. **`httpResource` (not Observable).** Fields like `readonly locationResource = httpResource<...>()` are *signals*, not Observables. You do not mock them via `HttpTestingController.flush` directly — you check them after `fixture.detectChanges()` as `component.locationResource.value()`.
+4. **⚠️ `httpResource` sends its GET ASYNCHRONOUSLY (Angular effects).** If a service has an `httpResource` field, then on `TestBed.inject(Service)` the GET request goes into the testing backend queue — but **not synchronously** (you cannot `expectOne().flush()` it in `beforeEach` — it throws "found none"). Solution: drain leftover requests in `afterEach` BEFORE `verify()`:
    ```ts
    afterEach(() => {
      for (const req of httpMock.match('/api/locations')) {
-       req.flush([]); // symulowana odpowiedź dla auto-fetch z httpResource
+       req.flush([]); // simulated response for the auto-fetch from httpResource
      }
-     httpMock.verify(); // teraz kolejka jest pusta → nie ma "open requests"
+     httpMock.verify(); // now the queue is empty → no "open requests"
    });
    ```
-5. **Kolejność: najpierw wywołaj metodę, potem `expectOne`, potem `flush`.** `firstValueFrom(...)` subskrybuje **natychmiast** — request idzie do kolejki w momencie wywołania metody serwisu. Jeśli zrobisz `expectOne()` PRZED wywołaniem → "found none" (request jeszcze nie istnieje). Jeśli zapomnisz `flush()` → Observable nigdy nie emituje → **timeout 5000ms**.
+5. **Order: call the method first, then `expectOne`, then `flush`.** `firstValueFrom(...)` subscribes **immediately** — the request enters the queue at the moment the service method is called. If you do `expectOne()` BEFORE the call → "found none" (the request does not exist yet). If you forget `flush()` → the Observable never emits → **timeout 5000ms**.
 
 ---
 
-## 2. Test KOMPONENTU — logika sygnałów (bez renderowania)
+## 2. COMPONENT TESTS — signal logic (without rendering)
 
-Komponenty trzymają stan w **sygnałach** (`signal`, `computed`). Logikę biznesową testujemy, sterując tymi sygnałami i sprawdzając wyniki `computed`. To najszybsza warstwa testów — nie ruszamy DOM.
+Components keep their state in **signals** (`signal`, `computed`). We test business logic by driving those signals and checking the results of `computed`. This is the fastest test layer — we do not touch the DOM.
 
-Problem: sygnały są `protected` (encapsulacja). W teście robimy **typed cast** do małego widoku — kompilator nadal sprawdza każdy dostęp, bez `any`:
+Problem: signals are `protected` (encapsulation). In tests we make a **typed cast** to a small view — the compiler still checks every access, no `any`:
 
 ```ts
 import { TestBed, ComponentFixture } from '@angular/core/testing';
@@ -107,7 +107,7 @@ import { GoodsIssue } from './goods-issue';
 
 interface IssueFormModel { sku: string; qty: number | null; }
 
-// Mały typed view — tylko to, co test dotyka. Bez `any`.
+// Small typed view — only what the test touches. No `any`.
 type TestableGoodsIssue = {
   overStock: import('@angular/core').Signal<boolean>;
   canSubmit: import('@angular/core').Signal<boolean>;
@@ -116,7 +116,7 @@ type TestableGoodsIssue = {
   stockLoading: import('@angular/core').WritableSignal<boolean>;
 };
 
-describe('GoodsIssue (logika)', () => {
+describe('GoodsIssue (logic)', () => {
   let fixture: ComponentFixture<GoodsIssue>;
   let component: TestableGoodsIssue;
 
@@ -126,10 +126,10 @@ describe('GoodsIssue (logika)', () => {
       providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(GoodsIssue);
-    component = fixture.componentInstance as unknown as TestableGoodsIssue; // cast RAZ
+    component = fixture.componentInstance as unknown as TestableGoodsIssue; // cast ONCE
   });
 
-  it('overStock jest true tylko gdy qty > dostępny stan', () => {
+  it('overStock is true only when qty > available stock', () => {
     component.stockAvailable.set(50);
     component.issueModel.update((m) => ({ ...m, sku: 'SKU-001', qty: 20 }));
     expect(component.overStock()).toBe(false);
@@ -138,80 +138,80 @@ describe('GoodsIssue (logika)', () => {
     expect(component.overStock()).toBe(true);
   });
 
-  it('canSubmit wymaga poprawnego formularza + znanego stanu + braku niedoboru', () => {
+  it('canSubmit requires a valid form + known stock + no shortage', () => {
     component.issueModel.update((m) => ({ ...m, sku: 'SKU-001', qty: 5 }));
-    expect(component.canSubmit()).toBe(false);      // stan jeszcze nieznany
+    expect(component.canSubmit()).toBe(false);      // stock still unknown
 
     component.stockAvailable.set(50);
-    expect(component.canSubmit()).toBe(true);       // stan znany i wystarczający
+    expect(component.canSubmit()).toBe(true);       // stock known and sufficient
 
     component.issueModel.update((m) => ({ ...m, qty: 99 }));
-    expect(component.canSubmit()).toBe(false);      // niedobór → blokada
+    expect(component.canSubmit()).toBe(false);      // shortage → blocked
   });
 });
 ```
 
-### Pułapki komponentów sygnałowych
-1. **`Pick<Comp, 'x'>` nie działa na `protected`.** Kompilator: `TS2344 ... does not satisfy keyof GoodsIssue`. Zamiast tego zdefiniuj własny `type TestableX = { ... }` (jak wyżej) i zrób `as unknown as TestableX`.
-2. **Typ `computed()` to `Signal<T>`, NIE `Computed<T>`.** `@angular/core` nie eksportuje typu `Computed` — użycie `import('@angular/core').Computed<...>` da `TS2694 ... has no exported member 'Computed'`. Używaj `Signal<boolean>`.
-3. **`update()` vs `set()`.** Dla obiektów (model formularza) używaj `issueModel.update(m => ({...m, qty: 5}))`, żeby zachować pozostałe pola. `set()` podmienia cały obiekt.
+### Signal-component pitfalls
+1. **`Pick<Comp, 'x'>` does not work on `protected`.** Compiler: `TS2344 ... does not satisfy keyof GoodsIssue`. Instead define your own `type TestableX = { ... }` (as above) and cast with `as unknown as TestableX`.
+2. **The type of `computed()` is `Signal<T>`, NOT `Computed<T>`.** `@angular/core` does not export a `Computed` type — using `import('@angular/core').Computed<...>` gives `TS2694 ... has no exported member 'Computed'`. Use `Signal<boolean>`.
+3. **`update()` vs `set()`.** For objects (form models) use `issueModel.update(m => ({...m, qty: 5}))` to keep the remaining fields. `set()` replaces the whole object.
 
 ---
 
-## 3. Test HTML / SZABLONU — co widzi użytkownik
+## 3. HTML / TEMPLATE TESTS — what the user sees
 
-Ta warstwa renderuje komponent (`fixture.detectChanges()`) i sprawdza **DOM** — czy alert się pokazał, czy przycisk jest zablokowany, czy tekst się pojawił. To testy "z perspektywy użytkownika".
+This layer renders the component (`fixture.detectChanges()`) and checks the **DOM** — whether an alert appeared, whether a button is disabled, whether some text showed up. These are "user perspective" tests.
 
 ```ts
-it('pokazuje alert niedoboru i blokuje submit gdy qty > stan', () => {
+it('shows a shortage alert and blocks submit when qty > stock', () => {
   component.stockAvailable.set(13);
   component.issueModel.update((m) => ({ ...m, sku: 'SKU-001', qty: 20 }));
-  fixture.detectChanges(); // ← renderuje szablon po zmianie sygnałów
+  fixture.detectChanges(); // ← renders the template after signal changes
 
   const alert = fixture.nativeElement.querySelector('.stock-error');
   expect(alert).toBeTruthy();
   expect(alert.textContent).toContain('Nicht genug Bestand!');
 
   const button: HTMLButtonElement = fixture.nativeElement.querySelector('button[type=submit]');
-  expect(button.disabled).toBe(true); // atrybut disabled na <button>
+  expect(button.disabled).toBe(true); // the disabled attribute on <button>
 });
 
-it('ukrywa alert gdy qty mieści się w stanie', () => {
+it('hides the alert when qty fits within stock', () => {
   component.stockAvailable.set(13);
   component.issueModel.update((m) => ({ ...m, sku: 'SKU-001', qty: 5 }));
   fixture.detectChanges();
-  expect(fixture.nativeElement.querySelector('.stock-error')).toBeNull(); // brak elementu = ukryty
+  expect(fixture.nativeElement.querySelector('.stock-error')).toBeNull(); // no element = hidden
 });
 ```
 
-### Pułapki testów szablonu
-1. **Zawsze `fixture.detectChanges()` po zmianie sygnału**, zanim sprawdzisz DOM — inaczej szablon nie odświeży się i zobaczysz stary stan.
-2. **Selektory muszą zgadzać się z `.html`.** Używaj klas semantycznych (`.stock-error`, `.stock-state`) albo atrybutów (`button[type=submit]`), nie kolejności dzieci — kruche przy refaktoringu.
-3. **`disabled` to atrybut, nie tekst.** `expect(button.disabled).toBe(true)` — nie `textContent`.
+### Template test pitfalls
+1. **Always `fixture.detectChanges()` after a signal change** before checking the DOM — otherwise the template is not refreshed and you see stale state.
+2. **Selectors must match the `.html`.** Use semantic classes (`.stock-error`, `.stock-state`) or attributes (`button[type=submit]`), not child order — brittle under refactoring.
+3. **`disabled` is an attribute, not text.** `expect(button.disabled).toBe(true)` — not `textContent`.
 
 ---
 
-## 4. Testy zależności (DI) — SPY vs zwykła funkcja ⚠️
+## 4. DEPENDENCY (DI) TESTS — SPY vs plain function ⚠️
 
-Gdy komponent zależy od serwisów (`AuthService`, `Router`) i chcesz sprawdzić, **czy metoda została wywołana**, mock musi być **spy'em** — nie zwykłą funkcją. To najczęstszy błąd (spotkany w `status.spec.ts`).
+When a component depends on services (`AuthService`, `Router`) and you want to check **whether a method was called**, the mock must be a **spy** — not a plain function. This is the most common mistake (encountered in `status.spec.ts`).
 
-### Dlaczego zwykła funkcja nie działa
+### Why a plain function does not work
 ```ts
-// ❌ ZWYKŁA strzałka niczego NIE zapisuje → .toHaveBeenCalled() rzuca:
+// ❌ A PLAIN arrow records NOTHING → .toHaveBeenCalled() throws:
 //    "TypeError: [Function logout] is not a spy or a call to a spy!"
-logout: () => { isLogoutCalled = true; },   // ręczny flag = workaround, nie test
-navigate: (arg) => {},                        // pusta funkcja, zero historii wywołań
+logout: () => { isLogoutCalled = true; },   // manual flag = workaround, not a test
+navigate: (arg) => {},                        // empty function, zero call history
 ```
 
-`vi.fn()` tworzy **spy** — funkcję, która *zapisuje każde wywołanie* (ile razy, z jakimi argumentami). Dopiero na spy możesz assertować.
+`vi.fn()` creates a **spy** — a function that *records every call* (how many times, with which arguments). Only on a spy can you assert.
 
-### Poprawnie (`status.spec.ts`)
+### Correctly (`status.spec.ts`)
 ```ts
 beforeEach(async () => {
   mockAuthService = {
     isAuthenticated: signal(true),
-    getUsername: () => 'manager',   // zwykła funkcja OK — nie assertujemy na niej
-    logout: vi.fn(),                // ← SPY (assertujemy, że wywołany)
+    getUsername: () => 'manager',   // plain function OK — we do not assert on it
+    logout: vi.fn(),                // ← SPY (we assert that it was called)
   };
   mockRouter = { navigate: vi.fn() }; // ← SPY
 
@@ -224,34 +224,34 @@ beforeEach(async () => {
   }).compileComponents();
 });
 
-it('onLogout wywołuje authService.logout() i router.navigate("/login")', () => {
+it('onLogout calls authService.logout() and router.navigate("/login")', () => {
   const fixture = TestBed.createComponent(Status);
   fixture.componentInstance.onLogout();
 
-  expect(mockAuthService.logout).toHaveBeenCalledTimes(1);   // dokładnie raz
-  expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']); // z tym argumentem
+  expect(mockAuthService.logout).toHaveBeenCalledTimes(1);   // exactly once
+  expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']); // with this argument
 });
 ```
 
-### Zasada do zapamiętania
-| Co chcesz sprawdzić | Użyj w mocku |
+### Rule to remember
+| What you want to check | Use in the mock |
 |---|---|
-| Tylko **zwrócić** wartość (np. `getUsername()`) | zwykła funkcja: `() => 'manager'` ✅ |
-| **Sprawdzić, że metoda została wywołana** / z jakimi argami | **spy**: `vi.fn()` ✅ |
+| Only **return** a value (e.g. `getUsername()`) | plain function: `() => 'manager'` ✅ |
+| **Check that a method was called** / with which args | **spy**: `vi.fn()` ✅ |
 
-- `vi.fn()` — czysty spy (zwraca `undefined`, chyba że podasz implementację: `vi.fn(() => 'x')`).
-- `vi.spyOn(realObj, 'method')` — spy na *istniejącej* metodzie realnego obiektu (zachowuje oryginalną logikę). Do mocków obiektowych standardem jest `vi.fn()`.
+- `vi.fn()` — a pure spy (returns `undefined`, unless you provide an implementation: `vi.fn(() => 'x')`).
+- `vi.spyOn(realObj, 'method')` — a spy on an *existing* method of a real object (keeps the original logic). For object mocks the standard is `vi.fn()`.
 
 ---
 
-## 5. Podsumowanie warstw testów (co i kiedy)
+## 5. Test layers summary (what and when)
 
-| Warstwa | Co testuje | Narzędzie | Przykład w repo |
+| Layer | What it tests | Tooling | Example in repo |
 |---|---|---|---|
-| **Serwis** | logika HTTP, parsowanie odpowiedzi | `HttpTestingController` + `firstValueFrom` | `logistics-service.examples.spec.ts` |
-| **Komponent (logika)** | sygnały / `computed`, reguły biznesowe | typed cast na sygnały, bez DOM | `goods-issue.examples.spec.ts` (sekcja logiki) |
-| **Komponent (HTML)** | renderowanie szablonu, alerty, disabled | `fixture.detectChanges()` + `querySelector` | `goods-issue.examples.spec.ts` (sekcja HTML) |
-| **Zależności DI** | czy komponent wywołuje serwis/router | `vi.fn()` spy + `useValue` provider | `status.spec.ts` |
+| **Service** | HTTP logic, response parsing | `HttpTestingController` + `firstValueFrom` | `logistics-service.examples.spec.ts` |
+| **Component (logic)** | signals / `computed`, business rules | typed cast to signals, no DOM | `goods-issue.examples.spec.ts` (logic section) |
+| **Component (HTML)** | template rendering, alerts, disabled | `fixture.detectChanges()` + `querySelector` | `goods-issue.examples.spec.ts` (HTML section) |
+| **DI dependencies** | whether the component calls service/router | `vi.fn()` spy + `useValue` provider | `status.spec.ts` |
 
-> Standard IHK: **controller = walidacja syntaktyczna, service = semantyczna (logika biznesowa).**
-> W frontendzie analogicznie: komponent = UI + orkiestracja, serwis = komunikacja z API. Testy serwisu sprawdzają *semantykę* (parsowanie, payload), testy komponenta — *syntaktykę* (czy UI reaguje poprawnie na stan).
+> IHK standard: **controller = syntactical validation, service = semantic (business logic).**
+> The frontend is analogous: component = UI + orchestration, service = API communication. Service tests check *semantics* (parsing, payload), component tests — *syntax* (whether the UI reacts correctly to state).

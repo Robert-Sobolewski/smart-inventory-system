@@ -17,10 +17,10 @@ describe('AddLocationService', () => {
   });
 
   afterEach(() => {
-    // locationResource (httpResource) wysyła GET /api/locations ASYNCHRONICZNIE
-    // (efekty Angulara — nie w momencie inject, więc nie da się go flushować
-    // synchronicznie w beforeEach). Drenujemy tu WSZYSTKIE pozostałe requesty,
-    // zanim verify() sprawdzi czy kolejka jest pusta.
+    // locationResource (httpResource) sends GET /api/locations ASYNCHRONOUSLY
+    // (Angular effects — not at inject time, so it cannot be flushed
+    // synchronously in beforeEach). We drain ALL remaining requests here,
+    // before verify() checks that the queue is empty.
     for (const req of httpMock.match('/api/locations')) {
       req.flush([]);
     }
@@ -38,19 +38,19 @@ describe('AddLocationService', () => {
 
   it('should call createLocation and return success string', async () => {
     const mockLocationCode = 'LOC-123';
-    // Realistyczna odpowiedź backendu (LocationController.java:79) — plain text!
+    // A realistic backend response (LocationController.java:79) — plain text!
     const expectedResponse = `Lagerplatz ${mockLocationCode} wurde erfolgreich angelegt.`;
 
-    // KROK 1: wywołaj metodę serwisu → request trafia do kolejki testing backendu.
-    // firstValueFrom subskrybuje natychmiast, więc request idzie TERAZ (nie po expectOne).
+    // STEP 1: call the service method → the request lands in the testing backend queue.
+    // firstValueFrom subscribes immediately, so the request goes out NOW (not after expectOne).
     const resultPromise = firstValueFrom(service.createLocation(mockLocationCode));
 
-    // KROK 2: "odbierz" request z kolejki i zwaliduj go.
+    // STEP 2: "receive" the request from the queue and validate it.
     const req = httpMock.expectOne('/api/locations/create');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ locationCode: mockLocationCode });
 
-    // KROK 3: symuluj odpowiedź backendu → Observable emituje, await się kończy.
+    // STEP 3: simulate the backend response → the Observable emits, the await completes.
     req.flush(expectedResponse);
 
     expect(await resultPromise).toBe(expectedResponse);

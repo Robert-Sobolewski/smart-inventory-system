@@ -13,12 +13,12 @@ export class Status {
   protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  // template widzi TYLKO czlonow klasy komponentu - wiec wystawiam je tutaj:
-  // isAuthenticated to signal, w template wywolujemy jak funkcje: isAuthenticated()
+  // the template can only see members of the component class — so we expose them here:
+  // isAuthenticated is a signal — in the template we call it like a function: isAuthenticated()
   protected readonly isAuthenticated = this.authService.isAuthenticated;
   protected readonly username = () => this.authService.getUsername();
 
-  // logout + redirect na login (inaczej zostaniemy na biezacej stronie bez tokena)
+  // logout + redirect to login (otherwise we would stay on the current page without a token)
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 /**
- * Główna nawigacja aplikacji (menu).
- * Odpowiedzialność: "dokąd mogę pójść" — celowo osobny komponent od Status
- * ("kim jestem": user + logout), zgodnie z zasadą pojedynczej odpowiedzialności.
+ * The main application navigation (menu).
+ * Responsibility: "where can I go" — deliberately a separate component from Status
+ * ("who am I": user + logout), following the single-responsibility principle.
  */
 @Component({
   imports: [RouterLink, RouterLinkActive],

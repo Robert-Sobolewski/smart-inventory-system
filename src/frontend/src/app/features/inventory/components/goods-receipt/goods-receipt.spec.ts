@@ -78,7 +78,7 @@ describe('GoodsReceipt (component)', () => {
 
       expect(c.receiveMessage()).toBe('Received 3 units of SKU-002 into B2');
       expect(c.receiveError()).toBeNull();
-      // formularz zresetowany — gotowy na kolejny wpis
+      // form reset — ready for the next entry
       expect(c.receiptModel()).toEqual({ sku: '', loc: '', qty: null });
     });
 
@@ -105,7 +105,7 @@ describe('GoodsReceipt (component)', () => {
 
       expect(c.receiveError()).toBe('Location A1 does not exist');
       expect(c.receiveMessage()).toBeNull();
-      // dane zostają w formularzu — użytkownik może poprawić i wysłać ponownie
+      // the data stays in the form — the user can correct it and resubmit
       expect(c.receiptModel()).toEqual({ sku: 'SKU-001', loc: 'A1', qty: 5 });
     });
 
@@ -137,7 +137,7 @@ describe('GoodsReceipt (component)', () => {
       const c = createComponent();
       const spy = vi.spyOn(service, 'receiveGoods').mockReturnValue(of('ok'));
 
-      await c.onSubmit({ preventDefault() {} } as unknown as Event); // pusty formularz -> invalid
+      await c.onSubmit({ preventDefault() {} } as unknown as Event); // empty form -> invalid
 
       expect(spy).not.toHaveBeenCalled();
     });

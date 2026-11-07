@@ -17,10 +17,10 @@ describe('SupplierService', () => {
   });
 
   afterEach(() => {
-    // supplierResource (httpResource) wysyła GET /api/suppliers ASYNCHRONICZNIE
-    // (efekty Angulara — nie w momencie inject, więc nie da się go flushować
-    // synchronicznie w beforeEach). Drenujemy tu WSZYSTKIE pozostałe requesty,
-    // zanim verify() sprawdzi czy kolejka jest pusta.
+    // supplierResource (httpResource) sends GET /api/suppliers ASYNCHRONOUSLY
+    // (Angular effects — not at inject time, so it cannot be flushed
+    // synchronously in beforeEach). We drain ALL remaining requests here,
+    // before verify() checks that the queue is empty.
     for (const req of httpMock.match('/api/suppliers')) {
       req.flush([]);
     }
@@ -38,24 +38,24 @@ describe('SupplierService', () => {
 
   it('should call createSupplier and return success string', async () => {
     const payload = { name: 'ACME GmbH', email: 'sales@acme.de' };
-    // Realistyczna odpowiedź backendu (SupplierController.java) — plain text!
+    // A realistic backend response (SupplierController.java) — plain text!
     const expectedResponse = `Lieferant ACME GmbH erfolgreich angelegt (ID: 1)`;
 
-    // KROK 1: wywołaj metodę serwisu → request trafia do kolejki testing backendu.
-    // firstValueFrom subskrybuje natychmiast, więc request idzie TERAZ (nie po expectOne).
+    // STEP 1: call the service method → the request lands in the testing backend queue.
+    // firstValueFrom subscribes immediately, so the request goes out NOW (not after expectOne).
     const resultPromise = firstValueFrom(service.createSupplier(payload));
 
-    // KROK 2: "odbierz" request z kolejki i zwaliduj go.
-    // UWAGA: predicate matcher — POST /api/suppliers ma TEN SAM URL co GET listy
-    // (supplierResource), więc expectOne('/api/suppliers') znalazłby dwa requesty.
-    // Matcher dostaje HttpRequest (nie TestRequest) -> właściwości .method/.url bezpośrednio.
+    // STEP 2: "receive" the request from the queue and validate it.
+    // NOTE: predicate matcher — POST /api/suppliers has THE SAME URL as the list GET
+    // (supplierResource), so a plain expectOne('/api/suppliers') would find two requests.
+    // The matcher receives the HttpRequest (not TestRequest) -> .method/.url properties directly.
     const req = httpMock.expectOne(
       (r) => r.method === 'POST' && r.url === '/api/suppliers',
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(payload);
 
-    // KROK 3: symuluj odpowiedź backendu → Observable emituje, await się kończy.
+    // STEP 3: simulate the backend response → the Observable emits, the await completes.
     req.flush(expectedResponse);
 
     expect(await resultPromise).toBe(expectedResponse);
@@ -63,9 +63,9 @@ describe('SupplierService', () => {
 
   it('should call updateSupplier and return the updated supplier object', async () => {
     const supplierId = 1;
-    // Backend update() wymaga non-null email -> UI zawsze wysyła wszystkie trzy pola
+    // The backend update() requires a non-null email -> the UI always sends all three fields
     const payload = { name: 'ACME AG', email: 'sales@acme.de', address: 'Musterstr. 1' };
-    // PUT /api/suppliers/{id} zwraca obiekt Supplier (JSON), nie plain text!
+    // PUT /api/suppliers/{id} returns the Supplier object (JSON), not plain text!
     const expectedResponse = { id: supplierId, ...payload };
 
     const resultPromise = firstValueFrom(service.updateSupplier(supplierId, payload));
@@ -81,7 +81,7 @@ describe('SupplierService', () => {
 
   it('should call deleteSupplier and return success string', async () => {
     const supplierId = 1;
-    // Realistyczna odpowiedź backendu (SupplierController.java) — plain text!
+    // A realistic backend response (SupplierController.java) — plain text!
     const expectedResponse = `Lieferant mit ID ${supplierId} geloescht`;
 
     const resultPromise = firstValueFrom(service.deleteSupplier(supplierId));

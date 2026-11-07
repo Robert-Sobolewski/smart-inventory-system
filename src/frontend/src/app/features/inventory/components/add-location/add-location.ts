@@ -72,14 +72,14 @@ export class AddLocation {
       error: (err) => {
         let body = err?.error;
         if (typeof body === 'string') {
-          // responseType 'text' -> body jest surowym stringiem, nawet przy 400.
+          // responseType 'text' -> the body is a raw string, even on a 400.
           try {
             const parsed = JSON.parse(body);
             if (parsed && typeof parsed.message === 'string') {
               this.updateError.set(parsed.message);
               return;
             }
-          } catch { /* nie jest JSON -> plain-text błąd */ }
+          } catch { /* not JSON -> plain-text error */ }
           this.updateError.set(body.length > 0 ? body : "Could not update location");
         } else if (body && typeof body.message === 'string') {
           this.updateError.set(body.message);
@@ -143,29 +143,29 @@ export class AddLocation {
 
     this.locationService.createLocation(payload).subscribe({
       next: (serverMessage) => {
-        // komunikat z backendu, np. "Lagerplatz A-1-01 wurde erfolgreich angelegt."
+        // message from the backend, e.g. "Lagerplatz A-1-01 wurde erfolgreich angelegt."
         this.createMessage.set(serverMessage ?? `Location ${payload} successful created`);
         this.createError.set(null);
         // Refresh the list so the new location shows up immediately
         this.locationResource.reload();
-        // reset() czyści wartość + touched/dirty i synchronizuje input (FormField)
+        // reset() clears the value + touched/dirty and syncs the input (FormField)
         this.locationForm().reset({locationCode: ""});
       },
       error: (err)=>{
         let body = err?.error;
         if(typeof body === 'string'){
-          // responseType 'text' -> body jest surowym stringiem, nawet przy 400.
-          // GlobalExceptionHandler zwraca JSON {message,...} - spróbuj go sparsować.
+          // responseType 'text' -> the body is a raw string, even on a 400.
+          // GlobalExceptionHandler returns JSON {message,...} — try to parse it.
           try{
             const parsed = JSON.parse(body);
             if(parsed && typeof parsed.message === 'string'){
               this.createError.set(parsed.message);
               return;
             }
-          }catch{ /* nie jest JSON -> plain-text błąd */ }
+          }catch{ /* not JSON -> plain-text error */ }
           this.createError.set(body.length > 0 ? body : "Could not create location");
         } else if(body && typeof body.message === 'string'){
-          // obiekt JSON (np. gdyby responseType był 'json')
+          // a JSON object (e.g. if responseType were 'json')
           this.createError.set(body.message);
         } else {
           this.createError.set("Could not create location");

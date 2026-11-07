@@ -5,7 +5,7 @@ import { Dashboard } from './dashboard';
 describe('Dashboard', () => {
   let component: Dashboard;
 
-  // helper — wiersz z sensownymi domyślnymi wartościami + nadpisanie konkretnych pól
+  // helper — a row with sensible default values + overriding specific fields
   function row(overrides: Partial<StockSummaryItem> = {}): StockSummaryItem {
     return {
       sku: 'SKU-1',
@@ -18,8 +18,8 @@ describe('Dashboard', () => {
     };
   }
 
-  // Komponent czyta resource TYLKO przez .value() — mock zwraca kontrolowane dane.
-  // undefined = stan httpResource przed odpowiedzią HTTP (initial state).
+  // The component reads the resource ONLY via .value() — the mock returns controlled data.
+  // undefined = the httpResource state before the HTTP response (initial state).
   function setup(rows: StockSummaryItem[] | undefined) {
     const mockDashboardService = {
       stockOverviewResource: { value: () => rows },
@@ -82,13 +82,13 @@ describe('Dashboard', () => {
     });
 
     it('sorts low-stock first, then by sku alphabetically', () => {
-      // act — wejście celowo "przemieszane"
+      // act — input deliberately "shuffled"
       setup([
         row({ sku: 'B-100' }),
         row({ sku: 'A-200', lowStock: true }),
         row({ sku: 'C-300', lowStock: true }),
       ]);
-      // assert — low-stock (A, C) przed normalnym (B); w grupie porządek po SKU
+      // assert — low-stock (A, C) before normal (B); within a group ordered by SKU
       expect((component as any).sortedRows().map((r: StockSummaryItem) => r.sku)).toEqual([
         'A-200',
         'C-300',
@@ -97,12 +97,12 @@ describe('Dashboard', () => {
     });
 
     it('does not mutate the source array (copy before sort)', () => {
-      // setup — trzymamy odniesienie do źródła, żeby sprawdzić, że sort nie mutuje
+      // setup — we keep a reference to the source to verify that sort does not mutate it
       const rows = [row({ sku: 'B-100' }), row({ sku: 'A-200', lowStock: true })];
       setup(rows);
       // act
       (component as any).sortedRows();
-      // assert — źródło zachowuje oryginalny porządek ([...rows].sort w komponencie)
+      // assert — the source keeps its original order ([...rows].sort in the component)
       expect(rows.map((r) => r.sku)).toEqual(['B-100', 'A-200']);
     });
   });

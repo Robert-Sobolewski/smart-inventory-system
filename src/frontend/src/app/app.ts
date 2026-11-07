@@ -14,7 +14,7 @@ import { Nav } from './shared/components/nav/nav';
 export class App {
   private readonly router = inject(Router);
 
-  // reaktywny URL - aktualizuje sie przy kazdej nawigacji (NavigationEnd)
+  // reactive URL — updates on every navigation (NavigationEnd)
   protected readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -23,7 +23,7 @@ export class App {
     { initialValue: '' },
   );
 
-  // pasek statusu ukrywamy na stronie logowania
+  // we hide the status bar on the login page
   protected readonly showStatusBar = () => this.currentUrl() !== '/login';
 
   protected readonly title = signal('frontend');

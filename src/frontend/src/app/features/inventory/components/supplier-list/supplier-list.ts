@@ -77,7 +77,7 @@ export class SupplierList {
     const name = this.editName().trim();
     const emailValue = this.editEmail().trim();
     if (!name || !emailValue) {
-      // Backend update() oczekuje non-null email (w przeciwnym razie NPE) -> walidacja po stronie klienta
+      // The backend update() expects a non-null email (NPE otherwise) -> client-side validation
       this.updateError.set("Name and email can't be empty");
       return;
     }
@@ -86,7 +86,7 @@ export class SupplierList {
 
     this.supplierService.updateSupplier(id, payload).subscribe({
       next: (updated) => {
-        // PUT zwraca zaktualizowany obiekt Supplier (JSON), nie plain text
+        // PUT returns the updated Supplier object (JSON), not plain text
         this.updateMessage.set(`Lieferant ${updated.name} erfolgreich aktualisiert`);
         this.updateError.set(null);
         // Refresh the list so the new values show up immediately
@@ -97,7 +97,7 @@ export class SupplierList {
         this.editAddress.set('');
       },
       error: (err) => {
-        // responseType 'json' -> err.error jest już sparsowanym obiektem; helper toleruje też stringi
+        // responseType 'json' -> err.error is already a parsed object; the helper also tolerates strings
         this.updateError.set(this.extractErrorMessage(err, 'Could not update supplier'));
       }
     });
@@ -116,7 +116,7 @@ export class SupplierList {
         this.supplierResource.reload();
       },
       error: (err) => {
-        // responseType 'text' -> body jest surowym stringiem, nawet przy 400.
+        // responseType 'text' -> the body is a raw string, even on a 400.
         this.updateError.set(this.extractErrorMessage(err, 'Could not delete supplier'));
       }
     });
@@ -136,17 +136,17 @@ export class SupplierList {
 
     this.supplierService.createSupplier(payload).subscribe({
       next: (serverMessage) => {
-        // komunikat z backendu, np. "Lieferant ACME GmbH erfolgreich angelegt (ID: 1)"
+        // message from the backend, e.g. "Lieferant ACME GmbH erfolgreich angelegt (ID: 1)"
         this.createMessage.set(serverMessage ?? `Supplier ${payload.name} created`);
         this.createError.set(null);
         // Refresh the list so the new supplier shows up immediately
         this.supplierResource.reload();
-        // reset() czyści wartość + touched/dirty i synchronizuje input (FormField)
+        // reset() clears the value + touched/dirty and syncs the input (FormField)
         this.supplierForm().reset({ name: '', email: '', address: '' });
       },
       error: (err) => {
-        // responseType 'text' -> body jest surowym stringiem, nawet przy 400.
-        // GlobalExceptionHandler zwraca JSON {message,...} - helper parsuje go.
+          // responseType 'text' -> the body is a raw string, even on a 400.
+        // GlobalExceptionHandler returns JSON {message,...} — the helper parses it.
         this.createError.set(this.extractErrorMessage(err, 'Could not create supplier'));
       }
     });
@@ -167,7 +167,7 @@ export class SupplierList {
         if (parsed && typeof parsed.message === 'string' && parsed.message.length > 0) {
           return parsed.message;
         }
-      } catch { /* nie jest JSON -> plain-text błąd */ }
+      } catch { /* not JSON -> plain-text error */ }
       return body.length > 0 ? body : fallback;
     }
 

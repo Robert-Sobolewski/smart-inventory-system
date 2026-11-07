@@ -13,7 +13,7 @@ export const routes: Routes = [
   },
   {
     path: 'products',
-    canActivate: [authGuard], // <- guard: bez tokena redirect na /login
+    canActivate: [authGuard], // <- guard: without a token, redirects to /login
     loadComponent: () =>
       import('./features/inventory/components/product-list/product-list').then(
         (m) => m.ProductList,
@@ -21,7 +21,7 @@ export const routes: Routes = [
   },
   {
     path: 'suppliers',
-    canActivate: [authGuard], // <- guard: bez tokena redirect na /login
+    canActivate: [authGuard], // <- guard: without a token, redirects to /login
     loadComponent: () =>
       import('./features/inventory/components/supplier-list/supplier-list').then(
         (m) => m.SupplierList,

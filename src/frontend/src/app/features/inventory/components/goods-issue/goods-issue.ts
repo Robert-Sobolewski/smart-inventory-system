@@ -3,7 +3,7 @@ import { form, FormField, required, validate } from '@angular/forms/signals';
 import { Subscription } from 'rxjs';
 import { LogisticsService } from '../../services/logistics-service';
 
-// Local form model: qty is number|null — <input type="number"> zwraca null dla pustego pola
+// Local form model: qty is number|null — <input type="number"> returns null for an empty field
 interface IssueFormModel {
   sku: string;
   qty: number | null;
@@ -21,8 +21,8 @@ export class GoodsIssue {
   // form model for 'goods issue' (Warenausgang, FIFO)
   readonly issueModel = signal<IssueFormModel>({ sku: '', qty: null });
 
-  // form validation — strukturalna (required + integer >= 1).
-  // Walidacja "qty <= stan" jest osobnym computed (stockAvailable), bo zależy od stanu z API.
+  // form validation — structural (required + integer >= 1).
+  // The "qty <= stock" validation is a separate computed (stockAvailable) because it depends on the state from the API.
   readonly issueForm = form(this.issueModel, f => {
     required(f.sku, { message: 'SKU is required' });
     required(f.qty, { message: 'Quantity is required' });
@@ -39,20 +39,20 @@ export class GoodsIssue {
   readonly issueError = signal<string | null>(null);
   readonly issueMessage = signal<string | null>(null);
 
-  // --- Stock preview (alert braku towaru) -------------------------------------
-  // Przy zmianie SKU pobieramy aktualny stan z GET /stock/{sku} (debounce 400 ms).
+  // --- Stock preview (out-of-stock alert) -------------------------------------
+  // On SKU change we fetch the current stock from GET /stock/{sku} (400 ms debounce).
   readonly stockLoading = signal(false);
   readonly stockAvailable = signal<number | null>(null);
   readonly stockError = signal<string | null>(null);
 
-  // qty > dostępny stan -> alert + submit zablokowany (decyzja v1: all-or-nothing)
+  // qty > available stock -> alert + submit blocked (v1 decision: all-or-nothing)
   readonly overStock = computed(() => {
     const q = this.issueModel().qty;
     const s = this.stockAvailable();
     return q !== null && s !== null && !this.stockError() && q > s;
   });
 
-  // Submit tylko gdy: formularz ważny + stan znany (nie ładuje się, nie ma błędu) + qty <= stan
+  // Submit only when: the form is valid + the stock state is known (not loading, no error) + qty <= stock
   readonly canSubmit = computed(() => {
     return this.issueForm().valid()
       && !this.stockLoading()
@@ -65,8 +65,8 @@ export class GoodsIssue {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
-   * Wywoływane z (change) na polu SKU — debounce 400 ms, potem GET /stock/{sku}.
-   * Stan magazynowy jest podstawą alertu braku towaru i walidacji qty <= stan.
+   * Called from the (change) event on the SKU field — 400 ms debounce, then GET /stock/{sku}.
+   * The stock state is the basis for the out-of-stock alert and the qty <= stock validation.
    */
   onSkuChange(event: Event): void {
     const sku = (event.target as HTMLInputElement).value.trim();
@@ -75,7 +75,7 @@ export class GoodsIssue {
     this.stockSub?.unsubscribe();
     this.stockSub = null;
 
-    // puste SKU -> czyścimy podgląd stanu
+    // empty SKU -> we clear the stock preview
     if (!sku) {
       this.stockLoading.set(false);
       this.stockAvailable.set(null);
@@ -94,7 +94,7 @@ export class GoodsIssue {
           this.stockLoading.set(false);
         },
         error: (err) => {
-          // GlobalExceptionHandler zwraca JSON {message,...} — parsujemy jak w pozostałych formach.
+          // GlobalExceptionHandler returns JSON {message,...} — parsed like in the other forms.
           let body = err?.error;
           if (typeof body === 'string') {
             try {
@@ -118,31 +118,31 @@ export class GoodsIssue {
     event.preventDefault();
     if (!this.canSubmit()) return;
     const m = this.issueModel();
-    // payload mirrors the backend IssueRequest DTO: {sku, qty} — lokalizacji nie ma (FIFO)
+    // payload mirrors the backend IssueRequest DTO: {sku, qty} — no location (FIFO)
     const payload = { sku: m.sku.trim(), qty: m.qty as number };
 
     this.logisticsService.issueGoods(payload).subscribe({
       next: (serverMessage) => {
-        // komunikat z backendu, np. "Warenausgang (FIFO) fuer SKU: X erfolgreich durchgefuert!"
+        // message from the backend, e.g. "Warenausgang (FIFO) fuer SKU: X erfolgreich durchgefuert!"
         this.issueMessage.set(serverMessage ?? `Issue for ${payload.sku} successful`);
         this.issueError.set(null);
-        // reset() czyści wartość + touched/dirty i synchronizuje input (FormField)
+        // reset() clears the value + touched/dirty and syncs the input (FormField)
         this.issueForm().reset({ sku: '', qty: null });
-        // podgląd stanu też czyścimy — po wydaniu jest nieaktualny
+        // we also clear the stock preview — after issuing it is stale
         this.stockAvailable.set(null);
         this.stockError.set(null);
       },
       error: (err) => {
         let body = err?.error;
         if (typeof body === 'string') {
-          // responseType 'text' -> body jest surowym stringiem, nawet przy 400.
+          // responseType 'text' -> the body is a raw string, even on a 400.
           try {
             const parsed = JSON.parse(body);
             if (parsed && typeof parsed.message === 'string') {
               this.issueError.set(parsed.message);
               return;
             }
-          } catch { /* nie jest JSON -> plain-text błąd */ }
+          } catch { /* not JSON -> plain-text error */ }
           this.issueError.set(body.length > 0 ? body : 'Could not issue goods');
         } else if (body && typeof body.message === 'string') {
           this.issueError.set(body.message);

@@ -29,7 +29,7 @@ describe('SupplierList', () => {
   let suppliersData: any[] = [];
 
   beforeEach(async () => {
-    // PITFALL: metody wymagające toHaveBeenCalled muszą być vi.fn() spies, nie arrow functions
+    // PITFALL: methods that need toHaveBeenCalled must be vi.fn() spies, not arrow functions
     mockSupplierService = {
       supplierResource: {
         reload: vi.fn(),
@@ -94,7 +94,7 @@ describe('SupplierList', () => {
       // act
       component.onSubmit(new Event('submit'));
 
-      // assert — pusty adres mapowany na undefined, reszta przycięta
+      // assert — an empty address is mapped to undefined, the rest trimmed
       expect(mockSupplierService.createSupplier).toHaveBeenCalledWith({
         name: 'ACME GmbH',
         email: 'sales@acme.de',
@@ -102,7 +102,7 @@ describe('SupplierList', () => {
       expect(component.createMessage()).toBe('Lieferant ACME GmbH erfolgreich angelegt (ID: 1)');
       expect(component.createError()).toBe(null);
       expect(mockSupplierService.supplierResource.reload).toHaveBeenCalled();
-      // formularz zresetowany po sukcesie
+      // form reset after success
       expect(component.supplierModel().name).toBe('');
     });
 
@@ -115,15 +115,15 @@ describe('SupplierList', () => {
     });
 
     it('should parse a JSON error body (raw string) from the GlobalExceptionHandler', () => {
-      // responseType 'text' -> nawet przy 400 body jest surowym stringiem z JSON-em w środku
+      // responseType 'text' -> even on a 400 the body is a raw string with JSON inside
       component.supplierModel.set({ name: 'ACME GmbH', email: 'sales@acme.de', address: '' });
       mockSupplierService.createSupplier.mockReturnValue(
-        throwError(() => ({ error: JSON.stringify({ message: 'Dostawca z adresem e-mail sales@acme.de już istnieje' }) })),
+        throwError(() => ({ error: JSON.stringify({ message: 'A supplier with email address sales@acme.de already exists' }) })),
       );
 
       component.onSubmit(new Event('submit'));
 
-      expect(component.createError()).toBe('Dostawca z adresem e-mail sales@acme.de już istnieje');
+      expect(component.createError()).toBe('A supplier with email address sales@acme.de already exists');
     });
 
     it('should fall back to the raw text for non-JSON error bodies', () => {
@@ -174,7 +174,7 @@ describe('SupplierList', () => {
     it('should save the edit, show a message from the returned object and reload', () => {
       component.onEdit({ id: 1, name: 'ACME GmbH', email: 'x@y.de', address: null });
       component.editName.set('ACME AG');
-      // PUT zwraca obiekt Supplier (JSON), nie plain text
+      // PUT returns the Supplier object (JSON), not plain text
       mockSupplierService.updateSupplier.mockReturnValue(
         of({ id: 1, name: 'ACME AG', email: 'x@y.de', address: '' }),
       );
@@ -195,12 +195,12 @@ describe('SupplierList', () => {
     it('should show the message from a parsed JSON error object (responseType json)', () => {
       component.onEdit({ id: 1, name: 'ACME GmbH', email: 'x@y.de', address: null });
       mockSupplierService.updateSupplier.mockReturnValue(
-        throwError(() => ({ error: { message: 'Adres e-mail x@y.de jest już zajęty przez innego dostawcę' } })),
+        throwError(() => ({ error: { message: 'Email address x@y.de is already used by another supplier' } })),
       );
 
       component.onSaveEdit(1);
 
-      expect(component.updateError()).toBe('Adres e-mail x@y.de jest już zajęty przez innego dostawcę');
+      expect(component.updateError()).toBe('Email address x@y.de is already used by another supplier');
     });
   });
 
@@ -237,12 +237,12 @@ describe('SupplierList', () => {
     it('should parse a JSON error body (raw string) on delete failure', () => {
       confirmSpy.mockReturnValue(true);
       mockSupplierService.deleteSupplier.mockReturnValue(
-        throwError(() => ({ error: JSON.stringify({ message: 'Dostawca z ID 99 nie został znaleziony' }) })),
+        throwError(() => ({ error: JSON.stringify({ message: 'Supplier with ID 99 not found' }) })),
       );
 
       component.onDeleteSupplier({ id: 99, name: 'Ghost' });
 
-      expect(component.updateError()).toBe('Dostawca z ID 99 nie został znaleziony');
+      expect(component.updateError()).toBe('Supplier with ID 99 not found');
     });
   });
 });

@@ -104,7 +104,7 @@ describe('AddLocation', () => {
 
     it('should handle various error types in updateLocation', () => {
       component.editCode.set('BAD-CODE');
-      // Test 1: JSON error z wiadomością
+      // Test 1: JSON error with a message
       mockLocationService.updateLocation.mockReturnValue(
         throwError(() => ({ error: JSON.stringify({ message: 'Server error' }) })),
       );
@@ -118,7 +118,7 @@ describe('AddLocation', () => {
       component.onSaveEdit(1);
       expect(component.updateError()).toBe('Plain text error');
 
-      // Test 3: Obiekt bez wiadomości (fallback)
+      // Test 3: Object without a message (fallback)
       mockLocationService.updateLocation.mockReturnValue(
         throwError(() => ({ error: { somethingElse: 'no message' } })),
       );
@@ -175,8 +175,8 @@ describe('AddLocation', () => {
     it('sets error message from object property on failure', () => {
       vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
-      // Scenariusz: API zwraca obiekt bezpośrednio (bez JSON.stringify)
-      // z właściwością .message (często spotykane w Axios/Fetch)
+      // Scenario: the API returns an object directly (without JSON.stringify)
+      // with a .message property (common in Axios/Fetch)
       mockLocationService.deleteLocation.mockReturnValue(
         throwError(() => ({
           error: { message: 'Validation failed' },

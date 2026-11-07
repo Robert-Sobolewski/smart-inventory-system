@@ -20,7 +20,7 @@
     }
 
     <label for="loc">Location</label>
-    <!-- dropdown z listą lokalizacji z backendu; brak miejsca = manager zakłada je na /locations -->
+    <!-- dropdown with the location list from the backend; missing a spot? the manager creates it at /locations -->
     @if(locationResource.isLoading()){
       <select id="loc" disabled aria-label="Loading locations">
         <option value="">Loading locations...</option>
@@ -52,7 +52,7 @@
     <button type="submit" [disabled]="receiptForm().invalid()">Receive Goods</button>
   </form>
 
-  <!-- hint: brak miejsca w magazynie -->
+  <!-- hint: no space in the warehouse -->
   @if(hasNoLocations()){
     <div class="hint-state" role="note">
       <p>No locations yet. Create one first on the <a routerLink="/locations">Locations</a> page.</p>

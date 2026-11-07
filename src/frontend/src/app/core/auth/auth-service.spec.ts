@@ -51,7 +51,7 @@ describe('AuthService', () => {
   });
 
   it('should call save token service and update isAuthenticated signal', () => {
-    // setup — jsdom 28: localStorage to Proxy, więc spy musi stać na Storage.prototype
+    // setup — jsdom 28: localStorage is a Proxy, so the spy must sit on Storage.prototype
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
     const token = 'eyJhbG...lJPT';
     const username = 'Worker';
@@ -64,7 +64,7 @@ describe('AuthService', () => {
   });
 
   it('should call save token service without username', () => {
-    // setup — jsdom 28: localStorage to Proxy, więc spy musi stać na Storage.prototype
+    // setup — jsdom 28: localStorage is a Proxy, so the spy must sit on Storage.prototype
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
     const token = 'eyJhbG...lJPT';
     const username = 'Worker';

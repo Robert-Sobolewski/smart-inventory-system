@@ -1,15 +1,15 @@
-<!-- BLED 1: <aside.login-status> brak spacji i class -> <aside class="..."> -->
+<!-- BUG 1: <aside.login-status> missing space and class -> <aside class="..."> -->
 <aside class="status-bar">
-  <!-- BLED 2: isAuthenticated to SIGNAL - w template wywolujemy jak funkcje: isAuthenticated() -->
+  <!-- BUG 2: isAuthenticated is a SIGNAL — in the template we call it like a function: isAuthenticated() -->
   @if (isAuthenticated()) {
     <div>
-      <!-- BLED 3: AuthService.username nie istnieje - dodalem getUsername(), wystawione jako username() -->
+      <!-- BUG 3: AuthService.username does not exist — added getUsername(), exposed as username() -->
       <h3>{{ username() }}</h3>
-      <!-- logout() sam w sobie nie robi redirectu - onLogout() = logout + navigate('/login') -->
+      <!-- logout() by itself does no redirect — onLogout() = logout + navigate('/login') -->
       <button type="button" (click)="onLogout()">Logout</button>
     </div>
   } @else {
-    <!-- BLED 4: <a href="/login"> = calkowity reload strony. routerLink = SPA, bez reloadu -->
+    <!-- BUG 4: <a href="/login"> = full page reload. routerLink = SPA, no reload -->
     <a routerLink="/login">Go to login page</a>
   }
 </aside>

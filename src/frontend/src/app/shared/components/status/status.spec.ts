@@ -9,9 +9,9 @@ describe('Status', () => {
   let mockRouter: any;
 
   beforeEach(async () => {
-    // vi.fn() tworzy SPY — zapisuje każde wywołanie, więc możemy na nie assertować.
-    // Zwykła strzałka (logout: () => {...}) niczego NIE zapisuje — dlatego
-    // .toHaveBeenCalled() rzucał "is not a spy or a call to a spy".
+    // vi.fn() creates a SPY — it records every call, so we can assert on them.
+    // A plain arrow (logout: () => {...}) records NOTHING — that is why
+    // .toHaveBeenCalled() threw "is not a spy or a call to a spy".
     mockAuthService = {
       isAuthenticated: signal(true),
       getUsername: () => 'manager',
@@ -54,7 +54,7 @@ describe('Status', () => {
     const component = fixture.componentInstance;
     component.onLogout();
 
-    // Oba są teraz spy'ami, więc możemy assertować na ich wywołaniach.
+    // Both are spies now, so we can assert on their calls.
     expect(mockAuthService.logout).toHaveBeenCalledTimes(1);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
   });

@@ -20,7 +20,7 @@ describe('GoodsIssue (component)', () => {
     return fixture.componentInstance;
   }
 
-  // helper: symuluje załadowany stan magazynowy (omija debounce z onSkuChange)
+  // helper: simulates a loaded stock state (bypasses the onSkuChange debounce)
   function setStock(c: GoodsIssue, qty: number): void {
     c.stockAvailable.set(qty);
     c.stockLoading.set(false);
@@ -59,7 +59,7 @@ describe('GoodsIssue (component)', () => {
     it('is false when stock is unknown (null)', () => {
       const c = createComponent();
       c.issueModel.set({ sku: 'SKU-001', qty: 2 });
-      // stockAvailable pozostaje null (domyślnie)
+      // stockAvailable stays null (by default)
       expect(c.canSubmit()).toBe(false);
     });
 
@@ -119,7 +119,7 @@ describe('GoodsIssue (component)', () => {
       expect(c.issueMessage()).toBe('Issued 2 units of SKU-001');
       expect(c.issueError()).toBeNull();
       expect(c.issueModel()).toEqual({ sku: '', qty: null });
-      // podgląd stanu wyczyszczony po sukcesie — następne SKU pobierze świeży stan
+      // the stock preview is cleared after success — the next SKU will fetch a fresh state
       expect(c.stockAvailable()).toBeNull();
     });
   });
@@ -137,7 +137,7 @@ describe('GoodsIssue (component)', () => {
 
       expect(c.issueError()).toBe('Not enough stock (available: 3)');
       expect(c.issueMessage()).toBeNull();
-      // dane zostają w formularzu — użytkownik może poprawić i wysłać ponownie
+      // the data stays in the form — the user can correct it and resubmit
       expect(c.issueModel()).toEqual({ sku: 'SKU-001', qty: 5 });
     });
 
@@ -208,7 +208,7 @@ describe('GoodsIssue (component)', () => {
 
       c.onSkuChange({ target: { value: 'SKU-001' } } as unknown as Event);
 
-      // przed debounce: załadowanie w toku, request jeszcze nie wyszedł
+      // before the debounce fires: loading in progress, the request has not gone out yet
       expect(c.stockLoading()).toBe(true);
       expect(spy).not.toHaveBeenCalled();
 
@@ -239,7 +239,7 @@ describe('GoodsIssue (component)', () => {
       c.onSkuChange({ target: { value: 'SKU-001' } } as unknown as Event);
       tick(400);
 
-      // tylko ostatnie SKU zostało pobrane — pierwsze odwołane (clearTimeout)
+      // only the last SKU was fetched — the first one was cancelled (clearTimeout)
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith('SKU-001');
     }));
